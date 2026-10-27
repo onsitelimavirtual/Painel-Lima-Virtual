@@ -1,0 +1,15 @@
+JavaScript syntax: OK
+
+V2.3.1 QA:
+{
+  "version_2_3_1": true,
+  "icon_visual": true,
+  "external_candidates": true,
+  "recognition_button": true,
+  "edge_detector": true,
+  "manual_upload": true,
+  "diamond_not_card_fallback": true,
+  "initials_fallback": true,
+  "service_worker": true,
+  "manifest": true
+}

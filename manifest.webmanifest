@@ -1,0 +1,9 @@
+{
+  "name": "Painel Lima Virtual 2.4",
+  "short_name": "Lima Virtual",
+  "description": "Portal de subsistemas com INKIS IA funcional e logomarca embutida no próprio HTML.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f"
+}

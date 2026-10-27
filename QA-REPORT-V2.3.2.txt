@@ -1,0 +1,11 @@
+JavaScript syntax: OK
+
+V2.3.2 QA:
+{
+  "inkis_public_url": true,
+  "local_fallback_preserved": true,
+  "builtin_primary_not_local": true,
+  "popup_feedback": true,
+  "icons_fix_preserved": true,
+  "supabase_preserved": true
+}
