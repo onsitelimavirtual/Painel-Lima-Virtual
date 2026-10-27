@@ -1,0 +1,11 @@
+JavaScript syntax: OK
+
+V2.3.3 QA:
+{
+  "inkis_logo_asset_exists": true,
+  "builtin_icon_url": true,
+  "bottom_nav_icon_image": true,
+  "inkis_public_url_preserved": true,
+  "icon_visual_support_preserved": true,
+  "service_worker_updated": true
+}

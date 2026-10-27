@@ -1,0 +1,12 @@
+JavaScript syntax: OK
+
+V2.4 QA:
+{
+  "version_2_4": true,
+  "inkis_logo_embedded": true,
+  "nav_inkis_embedded": true,
+  "no_local_inkis_logo_reference": true,
+  "inkis_public_url_preserved": true,
+  "icons_system_preserved": true,
+  "supabase_preserved": true
+}
