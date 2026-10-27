@@ -1,0 +1,17 @@
+JavaScript syntax: OK
+
+Structural QA:
+{
+  "authenticated_storage_loader": true,
+  "signed_url_removed": true,
+  "reimplant_html": true,
+  "admin_diagnostics": true,
+  "blob_execution": true,
+  "logo_embedded": true,
+  "service_worker": true,
+  "inkis_bundled": true,
+  "no_service_role": true,
+  "legal": true
+}
+
+Package files: OK

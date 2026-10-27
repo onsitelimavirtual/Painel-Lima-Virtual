@@ -1,0 +1,18 @@
+JavaScript syntax: OK
+
+Structural QA:
+{
+  "admin_ui": true,
+  "html_upload": true,
+  "external_url": true,
+  "published_filter": true,
+  "signed_storage": true,
+  "sandbox": true,
+  "inkis_bundled": true,
+  "setup_admin": true,
+  "no_service_role": true
+}
+Logo LV aplicada: OK
+Logo completa na tela de login: OK
+Ícones PWA LV 192/512: OK
+P removido do símbolo: OK
