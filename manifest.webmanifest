@@ -1,9 +1,0 @@
-{
-  "name": "Painel Lima Virtual 2.3.1 — Ícones Corrigidos",
-  "short_name": "Lima Virtual",
-  "description": "Portal inteligente de subsistemas com detecção de ícones externos e fallback por iniciais.",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#07111f",
-  "theme_color": "#07111f"
-}
