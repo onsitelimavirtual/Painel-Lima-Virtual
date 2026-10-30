@@ -1,0 +1,4 @@
+Atualização pontual: cartão Passe para o Concurso no rodapé.
+A logomarca original precisa estar em assets/passe/brand.webp na mesma raiz do index.html.
+Caso não esteja presente, será exibido texto alternativo.
+Não foram modificadas as configurações de login, pagamentos ou links de outros aplicativos.
