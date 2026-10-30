@@ -1,8 +1,9 @@
 {
-  "name": "Painel Lima Virtual 3.0",
+  "name": "Painel Lima Virtual 3.2",
   "short_name": "Lima Virtual",
-  "description": "Portal limpo e responsivo para acesso a subsistemas Lima Virtual.",
-  "start_url": "./index.html",
+  "description": "Portal com login Google, plano Educacional e licenciamento via Kiwify/Supabase.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#07111f",
   "theme_color": "#07111f"

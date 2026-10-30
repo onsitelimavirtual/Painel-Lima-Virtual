@@ -1,0 +1,21 @@
+{
+  "version_3_2": true,
+  "google_login": true,
+  "plan_ui": true,
+  "payments_admin": true,
+  "webhook_url_visible": true,
+  "license_profile": true,
+  "lv_asset": true,
+  "inkis_asset": true,
+  "cloudflare_workflow": true,
+  "firebase_workflow": true,
+  "javascript": "OK",
+  "http_smoke": {
+    "/": 200,
+    "/index.html": 200,
+    "/manifest.webmanifest": 200,
+    "/service-worker.js": 200,
+    "/assets/lv-logo.png": 200,
+    "/assets/inkis-ia-logo.png": 200
+  }
+}
