@@ -1,7 +1,7 @@
 {
-  "name": "Painel Lima Virtual 3.2",
+  "name": "Painel Lima Virtual 3.2.1",
   "short_name": "Lima Virtual",
-  "description": "Portal com login Google, plano Educacional e licenciamento via Kiwify/Supabase.",
+  "description": "Painel com ícone INKIS IA embutido e melhor contraste do bloco Passe para o Concurso.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
