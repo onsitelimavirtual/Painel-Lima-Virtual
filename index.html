@@ -347,12 +347,13 @@ footer{font-size:.62rem;padding-top:16px}
 (()=>{
 "use strict";
 const PLV_VERSION="4.0";const SUPABASE_URL="https://piagfpnjiwpngbikkkfp.supabase.co",API_KEY="sb_publishable_G7GV4Yox1KkbjZtjnYxFAQ_kzo9V05a",BUCKET="painel-lima-apps",ICON_BUCKET="painel-lima-icons",ICON_FUNCTION="plv-icon-detector",K={session:"plv2_session",theme:"plv2_theme",iconAuto:"plv2_icon_auto_v231"};
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];let session=load(K.session,null),isAdmin=false,apps=[],filter="Todos",currentViewerUrl="",currentViewerBlob="",health=new Map(),currentLicense=null,currentPlans=[];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];let session=load(K.session,null),isAdmin=false,apps=[],filter="Todos",currentViewerUrl="",currentViewerBlob="",health=new Map(),currentLicense=null,currentPlans=[],selectedApps=[],appAccess=new Map();
 const builtin=[];
 function load(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}function save(k,v){if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}function friendlyFetchError(err,scope="conexão"){const msg=String(err?.message||err||"");if(/Failed to fetch|Load failed|NetworkError|fetch/i.test(msg))return `Falha de conexão com ${scope}. Verifique a internet, aguarde alguns segundos e tente novamente.`;if(/AbortError|tempo esgotado|timeout/i.test(msg))return `Tempo esgotado ao acessar ${scope}. Tente novamente.`;return msg||`Falha ao acessar ${scope}.`}function slugify(s){return String(s||"app").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70)||"app"}function authHeaders(extra={}){return {apikey:API_KEY,Authorization:"Bearer "+session.access_token,...extra}}
 function toast(msg){const n=document.createElement("div");n.textContent=msg;Object.assign(n.style,{position:"fixed",left:"50%",bottom:"95px",transform:"translateX(-50%)",zIndex:200,background:"var(--strong)",color:"var(--page)",padding:"9px 13px",borderRadius:"999px",fontSize:".75rem",boxShadow:"var(--shadow)"});document.body.appendChild(n);setTimeout(()=>n.remove(),2200)}function openModal(title,body){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modalBack").classList.add("open")}function closeModal(){$("#modalBack").classList.remove("open")}function themeApply(t){document.documentElement.dataset.theme=t==="light"?"light":"dark";save(K.theme,t);$("#themeColor").content=t==="light"?"#f8fbff":"#07111f"}
 function expired(){return !session?.expires_at||Date.now()/1000>Number(session.expires_at)-60}async function authFetch(path,body){const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),15000);try{const r=await fetch(SUPABASE_URL+"/auth/v1/"+path,{method:"POST",headers:{apikey:API_KEY,"Content-Type":"application/json"},body:JSON.stringify(body),signal:ctl.signal});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error_description||d.msg||d.message||"Falha de autenticação.");return d}catch(e){throw new Error(friendlyFetchError(e,'o serviço de login'))}finally{clearTimeout(tm)}}async function refreshSession(){if(!session?.refresh_token)throw new Error("Sessão expirada.");try{session=await authFetch("token?grant_type=refresh_token",{refresh_token:session.refresh_token});save(K.session,session);return session.access_token}catch(e){session=null;save(K.session,null);throw new Error("Sua sessão expirou. Entre novamente.")}}async function token(){if(!session?.access_token)throw new Error("Faça login.");if(expired())return refreshSession();return session.access_token}
 async function rest(path,opts={}){await token();const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...opts,headers:authHeaders({"Content-Type":"application/json",Prefer:"return=representation",...(opts.headers||{})})});const txt=await r.text();let d=null;try{d=txt?JSON.parse(txt):null}catch{d=txt}if(!r.ok)throw new Error(d?.message||d?.hint||("Erro "+r.status));return d}
+async function rpc(name,args={}){return rest("rpc/"+encodeURIComponent(name),{method:"POST",body:JSON.stringify(args)})}
 
 async function captureOAuthSession(){
  const hash=new URLSearchParams(location.hash.replace(/^#/,""));
@@ -380,9 +381,7 @@ function beginGoogleLogin(){
  const url=SUPABASE_URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirect);
  location.href=url
 }
-function hasActivePlan(){
- return isAdmin||Boolean(currentLicense&&currentLicense.status==="active"&&new Date(currentLicense.expires_at).getTime()>Date.now())
-}
+function hasActivePlan(){const now=Date.now();return isAdmin||Boolean(currentLicense&&currentLicense.status==="active"&&(!currentLicense.starts_at||new Date(currentLicense.starts_at).getTime()<=now)&&new Date(currentLicense.expires_at).getTime()>now)}
 function formatBRL(cents){
  if(!Number.isFinite(Number(cents)))return "—";
  return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(cents)/100)
@@ -391,18 +390,7 @@ function formatDateBR(v){
  if(!v)return "—";
  try{return new Intl.DateTimeFormat("pt-BR",{dateStyle:"medium"}).format(new Date(v))}catch{return String(v)}
 }
-async function loadPlanState(){
- try{
-  const [plans,licenses]=await Promise.all([
-   rest("plv_plans?select=*&order=sort_order.asc,name.asc"),
-   rest("plv_licenses?select=user_id,plan_code,status,starts_at,expires_at,source,updated_at&limit=1")
-  ]);
-  currentPlans=Array.isArray(plans)?plans:[];
-  currentLicense=Array.isArray(licenses)&&licenses.length?licenses[0]:null
- }catch{
-  currentPlans=[];currentLicense=null
- }
-}
+async function loadPlanState(){try{const [plans,licenses,selected]=await Promise.all([rest("plv_plans?select=*&order=sort_order.asc,name.asc"),rest("plv_licenses?select=user_id,plan_code,status,starts_at,expires_at,source,updated_at,last_app_change_at&limit=1"),rest("plv_license_apps?select=app_id,selected_at&order=selected_at.asc")]);currentPlans=Array.isArray(plans)?plans:[];currentLicense=Array.isArray(licenses)&&licenses.length?licenses[0]:null;selectedApps=Array.isArray(selected)?selected:[];if(currentLicense){const p=currentPlans.find(x=>x.plan_code===currentLicense.plan_code);currentLicense.max_apps=Number(p?.max_apps||1)}}catch(e){currentPlans=[];currentLicense=null;selectedApps=[];console.warn("Falha ao carregar dados do plano",e)}}
 async function startCheckout(planCode){
  let popup=null;
  try{
@@ -427,12 +415,13 @@ async function startCheckout(planCode){
  }
 }
 function showPlanModal(){
- const active=hasActivePlan();
- const licenseHtml=currentLicense?`<div class="notice ${active?"ok":"warn"} plan-status"><strong>${active?"Plano ativo":"Plano sem acesso"}</strong><span>${esc(currentLicense.plan_code||"")}</span><span>Validade: ${esc(formatDateBR(currentLicense.expires_at))}</span></div>`:`<div class="notice warn">Nenhum plano ativo nesta conta.</div>`;
- const offers=currentPlans.filter(p=>p.active&&p.checkout_url&&p.amount_cents&&p.duration_days);
- const offersHtml=offers.length?offers.map(p=>`<div class="plan-card"><strong>${esc(p.name)}</strong><span class="plan-price">${esc(formatBRL(p.amount_cents))}</span><span class="plan-meta">${Number(p.duration_days)} dias de acesso</span><span class="plan-meta">${esc(p.description||"")}</span><button class="primary" data-buy-plan="${esc(p.plan_code)}">Contratar</button></div>`).join(""):`<div class="notice">O plano Educacional ainda está em configuração. Nenhuma cobrança será iniciada enquanto preço, duração e checkout não estiverem validados.</div>`;
- openModal("Meu plano",`${licenseHtml}<div class="plan-grid">${offersHtml}</div><div class="formactions"><button class="secondary" id="refreshPlanBtn">↻ Atualizar acesso</button></div>`);
- $$("[data-buy-plan]").forEach(b=>b.onclick=()=>startCheckout(b.dataset.buyPlan));
+ const active=hasActivePlan(),names=selectedApps.map(x=>apps.find(a=>String(a.id)===String(x.app_id))?.name).filter(Boolean);
+ const licenseHtml=currentLicense?`<div class="notice ${active?"ok":"warn"} plan-status"><strong>${active?"Plano ativo":"Plano sem acesso"}</strong><span>${esc(currentLicense.plan_code||"")}</span><span>Validade: ${esc(formatDateBR(currentLicense.expires_at))}</span><span>Aplicativos selecionados: ${selectedApps.length}/${Number(currentLicense.max_apps||1)}</span>${names.length?`<span>${esc(names.join(", "))}</span>`:""}</div>`:`<div class="notice warn">Nenhum plano ativo nesta conta. Os pacotes estão em preparação.</div>`;
+ const offers=currentPlans.filter(p=>p.checkout_url&&p.amount_cents&&p.duration_days&&Number(p.max_apps)>0);
+ const offersHtml=offers.length?offers.map(p=>`<div class="plan-card"><strong>${esc(p.name)}</strong><span class="plan-price">${esc(formatBRL(p.amount_cents))}</span><span class="plan-meta">${Number(p.duration_days)} dias • até ${Number(p.max_apps)} aplicativo(s)</span><span class="plan-meta">${esc(p.description||"")}</span>${p.active?`<button class="primary" data-buy-plan="${esc(p.plan_code)}">Contratar</button>`:`<button class="secondary" disabled>Em validação</button>`}</div>`).join(""):`<div class="notice">Pacotes comerciais em preparação.</div>`;
+ openModal("Meu plano",`${licenseHtml}${active?`<button class="primary" id="manageAppsBtn">${selectedApps.length?"Gerenciar aplicativos":"Selecionar aplicativos"}</button>`:""}<div class="plan-grid">${offersHtml}</div><div class="notice" style="margin-top:10px">A troca de aplicativos respeita intervalo mínimo de 30 dias. A demonstração tem limites diários por recurso. A contratação será liberada após validação de compra real e webhook.</div><div class="formactions"><button class="secondary" id="refreshPlanBtn">↻ Atualizar acesso</button></div>`);
+ $("[data-buy-plan]").forEach(b=>b.onclick=()=>startCheckout(b.dataset.buyPlan));
+ if($("#manageAppsBtn"))$("#manageAppsBtn").onclick=showAppSelection;
  $("#refreshPlanBtn").onclick=async()=>{await loadPlanState();closeModal();showPlanModal()}
 }
 async function showPlanAdmin(){
@@ -476,7 +465,19 @@ async function showPlanAdmin(){
  }
 }
 async function checkAdmin(){if(!session?.user?.id){isAdmin=false;return}try{const rows=await rest("plv_admins?select=user_id&user_id=eq."+encodeURIComponent(session.user.id));isAdmin=Array.isArray(rows)&&rows.length>0}catch{isAdmin=false}}
-async function loadApps(){try{const rows=await rest("plv_apps?select=*&order=sort_order.asc,name.asc");apps=[...builtin,...(Array.isArray(rows)?rows:[])].filter(a=>!/(^|[\s_-])inkis([\s_-]|$)/i.test(String(a.name||"")+" "+String(a.slug||"")));render();if(isAdmin)setTimeout(()=>autoRecognizeMissingIcons(),400)}catch(e){if(/sessão|login/i.test(e.message))return logout(false);toast(e.message);apps=[...builtin];render()}}
+async function showAppSelection(){
+ if(!hasActivePlan()||!currentLicense)return showPlanModal();
+ const max=Number(currentLicense.max_apps||1),chosen=new Set(selectedApps.map(x=>String(x.app_id))),list=apps.filter(a=>a.status==="published"&&!a.builtin&&a.requires_plan===true);
+ const last=currentLicense.last_app_change_at?new Date(currentLicense.last_app_change_at):null,next=last?new Date(last.getTime()+30*86400000):null,cooling=chosen.size>0&&next&&next.getTime()>Date.now();
+ const rows=list.map(a=>`<label class="checkrow" style="display:flex;align-items:center;gap:9px;padding:9px;border:1px solid var(--line);border-radius:11px"><input type="checkbox" data-select-app="${esc(a.id)}" ${chosen.has(String(a.id))?"checked":""} ${cooling?"disabled":""} style="width:auto"><span><strong>${esc(a.name)}</strong><small style="display:block;color:var(--muted);font-weight:400">${esc(a.description||"")}</small></span></label>`).join("");
+ openModal("Selecionar aplicativos",`<div class="notice">Seu plano permite selecionar até <strong>${max}</strong> aplicativo(s). Os selecionados terão acesso integral.</div>${cooling?`<div class="notice warn" style="margin-top:8px">A próxima alteração estará disponível em ${esc(formatDateBR(next.toISOString()))}. A seleção atual permanece ativa.</div>`:""}<div id="selectionCount" class="notice" style="margin:9px 0">Selecionados: ${chosen.size}/${max}</div><div class="form">${rows||'<div class="notice">Nenhum aplicativo elegível publicado.</div>'}</div><div id="selectionFeedback" class="notice hidden" style="margin-top:9px"></div><div class="formactions"><button class="secondary" id="selectionCancel">Voltar</button><button class="primary" id="selectionSave" ${cooling?"disabled":""}>Salvar seleção</button></div>`);
+ const checks=$("[data-select-app]"),count=$("#selectionCount"),saveBtn=$("#selectionSave");
+ const update=()=>{const n=checks.filter(c=>c.checked).length;count.textContent=`Selecionados: ${n}/${max}`;saveBtn.disabled=Boolean(cooling)||n<1||n>max};
+ checks.forEach(c=>c.onchange=update);update();
+ $("#selectionCancel").onclick=()=>{closeModal();showPlanModal()};
+ saveBtn.onclick=async()=>{const fb=$("#selectionFeedback"),ids=checks.filter(c=>c.checked).map(c=>c.dataset.selectApp);try{saveBtn.disabled=true;saveBtn.textContent="Salvando...";const result=await rpc("plv_set_license_apps",{p_app_ids:ids});await loadPlanState();await loadAppAccesses();render();closeModal();toast(result?.status==="unchanged"?"Seleção mantida":"Aplicativos atualizados")}catch(e){fb.textContent=String(e.message||e);fb.classList.remove("hidden");fb.classList.add("warn");saveBtn.disabled=false;saveBtn.textContent="Salvar seleção"}}
+}
+async function loadApps(){try{const rows=await rest("plv_apps?select=*&order=sort_order.asc,name.asc");apps=[...builtin,...(Array.isArray(rows)?rows:[])].filter(a=>!/(^|[\\s_-])inkis([\\s_-]|$)/i.test(String(a.name||"")+" "+String(a.slug||"")));appAccess.clear();render();await loadAppAccesses();render();if(isAdmin)setTimeout(()=>autoRecognizeMissingIcons(),400)}catch(e){if(/sessão|login/i.test(e.message))return logout(false);toast(e.message);apps=[...builtin];render()}}
 function categories(){const list=["Todos",...new Set(apps.filter(a=>a.status==="published"||isAdmin||a.builtin).map(a=>a.category||"Geral"))];$("#categories").innerHTML=list.map(c=>`<button class="chip ${c===filter?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");$$('[data-cat]').forEach(b=>b.onclick=()=>{filter=b.dataset.cat;render()})}
 
 function appInitials(name){
@@ -541,11 +542,10 @@ async function deleteIcon(path){
  try{await fetch(SUPABASE_URL+"/storage/v1/object/"+ICON_BUCKET,{method:"DELETE",headers:authHeaders({"Content-Type":"application/json"}),body:JSON.stringify({prefixes:[path]})})}catch{}
 }
 
-function card(a){
- const category=esc(a.category||"Geral");
- return `<article class="appcard"><div class="appicon">${iconVisual(a)}</div><h3>${esc(a.name)}</h3><p>${esc(a.description||"")}</p><div class="meta"><span class="badge">${category}</span></div><div class="cardactions"><button class="primary" data-open="${a.id}">Abrir</button></div></article>`
-}
-function render(){const q=$("#search").value.trim().toLowerCase();const visible=apps.filter(a=>(a.status==="published"||isAdmin||a.builtin)&&(filter==="Todos"||a.category===filter)&&(!q||(a.name+" "+a.description+" "+a.category).toLowerCase().includes(q)));$("#appGrid").innerHTML=visible.length?visible.map(card).join(""):'<div class="empty">Nenhum aplicativo encontrado.</div>';categories();$$("[data-open]").forEach(b=>b.onclick=()=>openApp(apps.find(a=>String(a.id)===b.dataset.open)))}
+function accessLabel(a){const x=appAccess.get(String(a.id));if(a.requires_plan===false)return "Licença própria";if(isAdmin||x?.access_level==="admin"||x?.access_level==="full")return "Acesso integral";if(x?.access_level==="demo")return "Demonstração";return "Verificando acesso"}
+function card(a){const category=esc(a.category||"Geral"),label=esc(accessLabel(a));return `<article class="appcard"><div class="appicon">${iconVisual(a)}</div><h3>${esc(a.name)}</h3><p>${esc(a.description||"")}</p><div class="meta"><span class="badge">${category}</span><span class="badge">${label}</span></div><div class="cardactions"><button class="primary" data-open="${a.id}">Abrir</button></div></article>`}
+async function loadAppAccesses(){const list=apps.filter(a=>a.status==="published"&&!a.builtin&&a.requires_plan!==false);await Promise.all(list.map(async a=>{try{const x=await rpc("plv_get_app_access",{p_app_id:a.id});appAccess.set(String(a.id),x||{allowed:false})}catch(e){appAccess.set(String(a.id),{allowed:false,reason:"access_unavailable",error:String(e.message||e)})}}))}
+function render(){const q=$("#search").value.trim().toLowerCase();const visible=apps.filter(a=>(a.status==="published"||isAdmin||a.builtin)&&(filter==="Todos"||a.category===filter)&&(!q||(a.name+" "+a.description+" "+a.category).toLowerCase().includes(q)));$("#appGrid").innerHTML=visible.length?visible.map(card).join(""):'<div class="empty">Nenhum aplicativo encontrado.</div>';categories();$("[data-open]").forEach(b=>b.onclick=()=>openApp(apps.find(a=>String(a.id)===b.dataset.open)))}
 async function fetchInternalHtml(path,asText=true){
  await token();
  const encoded=path.split('/').map(encodeURIComponent).join('/');
@@ -590,7 +590,12 @@ function viewer(title,url,isBlob=false){
 }
 async function openApp(a){
  if(!a)return;
- if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan()){showPlanModal();return}
+ if(!isAdmin&&a.requires_plan!==false){
+  try{const access=await rpc("plv_get_app_access",{p_app_id:a.id});appAccess.set(String(a.id),access||{});
+   if(!access?.allowed){toast("Acesso indisponível para este aplicativo.");showPlanModal();return}
+   if(access.access_level==="demo"){const quota=await rpc("plv_consume_demo_quota",{p_app_id:a.id,p_action_code:"content_view",p_units:1});if(!quota?.allowed){toast("Limite diário de demonstração atingido. Contrate um plano para continuar.");showPlanModal();return}toast(`Demonstração: ${quota.remaining??0} visualização(ões) restante(s) hoje.`)}
+  }catch(e){toast("Não foi possível validar seu acesso: "+String(e.message||e));return}
+ }
  let popup=null;
  try{
   if(a.builtin){
@@ -865,7 +870,7 @@ function profile(){
  $("#logoutBtn").onclick=()=>logout()
 }
 async function login(){const email=$("#loginEmail").value.trim(),password=$("#loginPass").value,fb=$("#loginFeedback");if(!email||!password)return;fb.classList.remove("hidden","warn");fb.textContent="Entrando...";try{session=await authFetch("token?grant_type=password",{email,password});save(K.session,session);await boot()}catch(e){fb.textContent=e.message||"Não foi possível entrar.";fb.classList.add("warn")}}
-function logout(show=true){session=null;save(K.session,null);isAdmin=false;apps=[];$("#appView").classList.add("hidden");$("#bottomNav").classList.add("hidden");$("#loginView").classList.remove("hidden");if(show)toast("Sessão encerrada")}async function boot(){try{await token();await checkAdmin();await loadPlanState();$("#loginView").classList.add("hidden");$("#appView").classList.remove("hidden");$("#bottomNav").classList.remove("hidden");await loadApps()}catch(e){logout(false)}}
+function logout(show=true){session=null;save(K.session,null);isAdmin=false;apps=[];selectedApps=[];appAccess.clear();currentLicense=null;currentPlans=[];$("#appView").classList.add("hidden");$("#bottomNav").classList.add("hidden");$("#loginView").classList.remove("hidden");if(show)toast("Sessão encerrada")}async function boot(){try{await token();await checkAdmin();await loadPlanState();$("#loginView").classList.add("hidden");$("#appView").classList.remove("hidden");$("#bottomNav").classList.remove("hidden");await loadApps()}catch(e){logout(false)}}
 $("#loginBtn").onclick=login;$("#googleLoginBtn").onclick=beginGoogleLogin;$("#loginPass").onkeydown=e=>{if(e.key==="Enter")login()};$("#themeBtn").onclick=()=>themeApply(document.documentElement.dataset.theme==="dark"?"light":"dark");$("#profileBtn").onclick=()=>session?profile():null;$("#refreshBtn").onclick=loadApps;$("#search").oninput=render;$("#modalClose").onclick=closeModal;$("#modalBack").onclick=e=>{if(e.target===$("#modalBack"))closeModal()};$("#viewerClose").onclick=()=>{$("#viewer").classList.remove("open");$("#viewerFrame").src="about:blank";releaseViewerBlob()};$("#viewerNewTab").onclick=()=>currentViewerUrl&&window.open(currentViewerUrl,"_blank","noopener");$$('[data-nav]').forEach(b=>b.onclick=()=>{$$('[data-nav]').forEach(x=>x.classList.remove("active"));b.classList.add("active");if(b.dataset.nav==="profile")profile();else window.scrollTo({top:0,behavior:"smooth"})});themeApply(load(K.theme,"dark"));if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./service-worker.js").catch(()=>{});captureOAuthSession().then(()=>{if(session)boot()}).catch(e=>{const fb=$("#loginFeedback");if(fb){fb.textContent=String(e.message||e);fb.classList.remove("hidden");fb.classList.add("warn")}});
 })();
 </script>
