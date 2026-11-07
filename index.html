@@ -559,7 +559,8 @@ async function deleteIcon(path){
 
 function card(a){
  const category=esc(a.category||"Geral");
- return `<article class="appcard"><div class="appicon">${iconVisual(a)}</div><h3>${esc(a.name)}</h3><p>${esc(a.description||"")}</p><div class="meta"><span class="badge">${category}</span></div><div class="cardactions"><button class="primary" data-open="${a.id}">Abrir</button></div></article>`
+ const demoAvailable=a.id==="d0f53071-550f-4a6e-9cb9-959019339141";
+ return `<article class="appcard"><div class="appicon">${iconVisual(a)}</div><h3>${esc(a.name)}</h3><p>${esc(a.description||"")}</p><div class="meta"><span class="badge">${category}</span>${demoAvailable?'<span class="badge">Demonstração gratuita</span>':""}</div><div class="cardactions"><button class="primary" data-open="${a.id}">Abrir</button></div></article>`
 }
 function render(){const q=$("#search").value.trim().toLowerCase();const visible=apps.filter(a=>(a.status==="published"||isAdmin||a.builtin)&&(filter==="Todos"||a.category===filter)&&(!q||(a.name+" "+a.description+" "+a.category).toLowerCase().includes(q)));$("#appGrid").innerHTML=visible.length?visible.map(card).join(""):'<div class="empty">Nenhum aplicativo encontrado.</div>';categories();$$("[data-open]").forEach(b=>b.onclick=()=>openApp(apps.find(a=>String(a.id)===b.dataset.open)))}
 async function fetchInternalHtml(path,asText=true){
@@ -606,7 +607,8 @@ function viewer(title,url,isBlob=false){
 }
 async function openApp(a){
  if(!a)return;
- if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan()){showPlanModal();return}
+ const demoAvailable=a.id==="d0f53071-550f-4a6e-9cb9-959019339141";
+ if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan()&&!demoAvailable){showPlanModal();return}
  let popup=null;
  try{
   if(a.builtin){
