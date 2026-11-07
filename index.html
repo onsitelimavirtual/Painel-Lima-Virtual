@@ -442,7 +442,7 @@ async function showPlanModal(preselectAppId=""){
  const licenseHtml=activeLicenses.length?activeLicenses.map(l=>{
   const app=apps.find(a=>a.id===l.app_id);
   return '<div class="notice ok plan-status"><strong>'+esc(app?.name||"Sistema licenciado")+'</strong><span>'+esc(l.plan_code||"Licença individual")+'</span><span>Validade: '+esc(formatDateBR(l.expires_at))+'</span></div>'
- }).join(""):'<div class="notice warn">Nenhuma licença ativa. A demonstração gratuita continua disponível.</div>';
+ }).join(""):'<div class="notice warn">Nenhuma licença ativa. A demonstração gratuita está disponível somente nos aplicativos identificados com o selo “Demonstração gratuita”. Nos demais, é necessário contratar uma licença para acessar.</div>';
  const offers=currentPlans.filter(p=>p.active&&p.checkout_url&&p.amount_cents&&p.duration_days&&p.max_apps===1);
  const offersHtml=offers.length?offers.map(p=>'<div class="plan-card"><strong>'+esc(p.name)+'</strong><span class="plan-price">'+esc(formatBRL(p.amount_cents))+'</span><span class="plan-meta">'+Number(p.duration_days)+' dias de acesso a 1 sistema</span><span class="plan-meta">'+esc(p.description||"")+'</span><button class="primary" data-buy-plan="'+esc(p.plan_code)+'">Contratar</button></div>').join(""):'<div class="notice">Oferta individual: R$ 29,90 por sistema, com validade de 30 dias. A liberação do checkout depende da validação final da assinatura do webhook Kiwify.</div>';
  const eligible=await rest("plv_apps?select=id,name&status=eq.published&requires_plan=eq.true&order=sort_order.asc,name.asc");
