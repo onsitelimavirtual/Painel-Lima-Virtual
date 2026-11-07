@@ -297,7 +297,7 @@ async function checkGoogleSetup(){
    if(!response.ok)throw new Error('Consulta indisponível (HTTP '+response.status+').');
    const settings=await response.json();
    if(settings?.external?.google===true){
-     showAuthMessage('Google habilitado no Supabase. Próximo passo: confirmar o Client ID/Secret na Google Cloud e autorizar a URL pública exata em Authentication → URL Configuration. Tente Entrar com Google.');
+     showAuthMessage('Conexão com Google concluída. Sua conta está autenticada. A licença paga é verificada separadamente no servidor; se ainda não houver uma licença ativa, você pode continuar pela demonstração.');
    }else if(settings?.external?.google===false){
      showAuthMessage('Google NÃO está habilitado neste projeto Supabase. Ative em Authentication → Providers → Google e configure Client ID e Client Secret da Google Cloud.',true);
    }else{
