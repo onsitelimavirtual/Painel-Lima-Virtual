@@ -646,7 +646,7 @@ function installForm(a=null){
   <label>Descrição<textarea id="fDesc">${esc(a?.description||"")}</textarea></label>
   <label>Ordem<input id="fOrder" type="number" value="${Number(a?.sort_order??100)}"></label>
   <div class="formrow"><label>Tipo<select id="fType" ${editing?"disabled":""}><option value="external" ${a?.app_type==="external"?"selected":""}>URL externa</option><option value="html" ${a?.app_type==="html"?"selected":""}>HTML interno</option></select></label><label>Abertura<select id="fOpen"><option value="panel" ${a?.open_mode==="panel"?"selected":""}>Dentro do painel</option><option value="newtab" ${a?.open_mode==="newtab"?"selected":""}>Nova aba</option><option value="fullscreen" ${a?.open_mode==="fullscreen"?"selected":""}>Tela inteira</option></select></label></div>
-  <label class="checkrow"><input id="fRequiresPlan" type="checkbox" ${a?.requires_plan!==false?"checked":""}>Exige plano ativo para abrir</label>
+  <div class="notice">Licenciamento padrão obrigatório: R$ 29,90 por aplicativo, válido por 30 dias. A demonstração pode permanecer disponível conforme as regras do aplicativo.</div>
   <label>Status<select id="fStatus"><option value="draft" ${a?.status==="draft"?"selected":""}>Rascunho</option><option value="published" ${a?.status==="published"?"selected":""}>Publicado</option><option value="hidden" ${a?.status==="hidden"?"selected":""}>Oculto</option></select></label>
   <label id="urlRow">URL externa<input id="fUrl" value="${esc(a?.external_url||"")}" placeholder="https://..."></label>
   <label id="fileRow" class="hidden">${editing&&isHtml?"Substituir HTML (opcional)":"Arquivo HTML"}<input id="fFile" type="file" accept=".html,text/html"></label>
@@ -685,7 +685,7 @@ async function uploadHtml(file,slug){
  }finally{clearTimeout(tm)}
 }
 function formData(){
- const name=$("#fName").value.trim(),category=$("#fCategory").value.trim()||"Geral",description=$("#fDesc").value.trim(),sort_order=Number($("#fOrder").value||100),open_mode=$("#fOpen").value,status=$("#fStatus").value,icon_mode=$("#fIconMode").value,requires_plan=$("#fRequiresPlan").checked;
+ const name=$("#fName").value.trim(),category=$("#fCategory").value.trim()||"Geral",description=$("#fDesc").value.trim(),sort_order=Number($("#fOrder").value||100),open_mode=$("#fOpen").value,status=$("#fStatus").value,icon_mode=$("#fIconMode").value,requires_plan=true;
  if(!name)throw new Error("Informe o nome.");
  return {name,slug:slugify(name),category,description,icon:appInitials(name),icon_mode,sort_order,open_mode,status,requires_plan}
 }
