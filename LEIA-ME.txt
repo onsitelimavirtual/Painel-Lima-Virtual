@@ -1,0 +1,22 @@
+# Lima Virtual — arquivos com modo de demonstração
+
+Foram preparados 9 arquivos HTML autônomos com uma faixa visível de **DEMONSTRAÇÃO GRATUITA** e bloqueio visual/interativo de controles identificados como recursos administrativos ou avançados (exportação, backup, ranking, comunidade, painéis institucionais, licenciamento e funções equivalentes).
+
+## Arquivos incluídos
+- AVIA ProfessorZão
+- Chat com Matemática
+- ConcursoIA tech
+- Inteligent Hability
+- Meu Primeiro Laboratório de Matemática
+- Meu Reforço Favorito
+- Minha Primeira Aprendizagem Virtual
+- Passe para o Concurso
+- TCC e Monografia Studio
+
+## Limites e ressalvas técnicas
+- Os arquivos originais foram preservados; os arquivos `_DEMO.html` são cópias modificadas.
+- O modo demonstração é uma camada de interface no navegador. Não é proteção criptográfica nem substitui autorização no servidor.
+- A camada impede o uso de controles reconhecidos como administrativos/avançados, mas não audita nem garante limitação de todo recurso interno de cada aplicação.
+- O pacote ainda não foi publicado no Supabase/GitHub Pages nem conectado ao Painel Lima Virtual.
+- A Mentoria Extraordinária não foi modificada.
+- O arquivo A Chave da Matemática do cadastro do Painel não foi identificado com esse nome entre os anexos; AVIA ProfessorZão foi incluído como arquivo fornecido, sem presumir que seja o mesmo aplicativo.

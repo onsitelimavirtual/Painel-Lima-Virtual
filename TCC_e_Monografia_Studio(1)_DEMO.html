@@ -1,0 +1,1398 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#081b33">
+<title>TCC & Monografia Studio 4.0</title>
+<link rel="icon" href='data:image/svg+xml;utf8,
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<defs>
+<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%2360a5fa"/><stop offset="1" stop-color="%232563eb"/></linearGradient>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23f7c653"/><stop offset="1" stop-color="%23c98a16"/></linearGradient>
+</defs>
+<rect width="128" height="128" rx="28" fill="%23081b33"/>
+<path d="M18 76c16-5 31-2 42 9V46c-15-9-30-9-45-3v39c1-2 2-4 3-6Zm42 9c11-11 26-14 42-9 1 2 2 4 3 6V43c-15-6-30-6-45 3v39Z" fill="none" stroke="url(%23g)" stroke-width="5"/>
+<path d="M25 31 59 16l34 15-34 15-34-15Z" fill="none" stroke="url(%23b)" stroke-width="6"/>
+<path d="M89 68c14-18 17-35 18-47-14 8-25 20-34 37-4 10-6 19-6 27 7-6 14-12 22-17Z" fill="url(%23g)"/>
+</svg>' type="image/svg+xml">
+<style>
+:root{
+ --navy:#081b33;--navy2:#0f2747;--blue:#2563eb;--blue2:#60a5fa;--gold:#c98a16;--gold2:#f7c653;
+ --bg:#f3f6fb;--card:#ffffff;--ink:#172033;--muted:#64748b;--line:#dce4ef;--soft:#eef4ff;
+ --ok:#087f5b;--warn:#b86b00;--bad:#bd2c2c;--shadow:0 12px 34px rgba(8,27,51,.08);--radius:16px;
+ --safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{color:#1d4ed8;text-decoration:none}
+.app{min-height:100vh;display:grid;grid-template-columns:290px 1fr}
+aside{
+  position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,#07182d 0%,#0c2c52 100%);
+  color:#dce8f6;padding:18px 16px calc(18px + var(--safe-bottom));
+}
+.logoWrap{background:#fff;border-radius:18px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.12);margin-bottom:14px}
+.version{display:inline-flex;border:1px solid rgba(255,255,255,.16);padding:6px 10px;border-radius:999px;color:#c7daee;font-size:11px;font-weight:800;letter-spacing:.6px;margin-bottom:14px}
+.nav{display:grid;gap:4px}
+.nav button{
+ width:100%;border:0;background:transparent;color:#dce8f6;text-align:left;border-radius:12px;padding:12px 12px;display:flex;align-items:center;gap:10px
+}
+.nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(37,99,235,.45),rgba(96,165,250,.12));color:#fff}
+.nav .ico{width:20px;text-align:center}
+.sideNote{margin-top:16px;color:#abc0d6;font-size:11.5px;line-height:1.5;padding:10px 6px}
+main{min-width:0;padding:22px}
+header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
+.top h1{margin:0 0 4px;font-size:26px}
+.top p{margin:0;color:var(--muted);font-size:13px}
+.topActions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.badge{font-size:11px;padding:6px 9px;border-radius:999px;background:#eaf1ff;color:#1d4ed8;border:1px solid #cfe0ff;font-weight:800}
+.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:800;background:#e7edf5;color:#172033}
+.btn:hover{filter:brightness(.98)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.dark{background:var(--navy2);color:#fff}
+.btn.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#3d2b07}
+.btn.good{background:var(--ok);color:#fff}
+.btn.ghost{background:#fff;border:1px solid #cbd6e5}
+.btn.danger{background:#fee2e2;color:#991b1b}
+.hero{
+ background:linear-gradient(125deg,#07182d 0%,#103b6b 63%,#184f8d 100%);color:#fff;border-radius:20px;padding:20px 22px;
+ display:grid;grid-template-columns:1.25fr .75fr;gap:18px;box-shadow:var(--shadow);position:relative;overflow:hidden
+}
+.hero:after{content:"";position:absolute;width:260px;height:260px;right:-90px;top:-100px;border-radius:50%;background:radial-gradient(circle,rgba(247,198,83,.30),rgba(247,198,83,0) 68%)}
+.hero h2{margin:0 0 8px;font-family:Georgia,serif;font-size:30px}
+.hero p{margin:0;color:#dbe8f7;line-height:1.55}
+.hero ul{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+.hero li:before{content:"✓";display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--gold2);color:#392603;font-weight:900;margin-right:7px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px;margin-top:15px}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}.c3{grid-column:span 3}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:17px;box-shadow:var(--shadow)}
+.card h3{font-size:17px;margin:0 0 10px}
+.card h4{margin:14px 0 6px}
+.muted{color:var(--muted);font-size:13px;line-height:1.55}
+.metric{padding:15px;border-radius:14px;background:linear-gradient(135deg,#f8fbff,#eff5fd);border:1px solid #deE8f3}
+.metric strong{display:block;font-size:25px}.metric span{font-size:12px;color:var(--muted)}
+label{display:block;font-size:12px;color:#475569;font-weight:800;margin:10px 0 6px}
+input,textarea,select{width:100%;border:1px solid #cbd6e5;border-radius:11px;padding:11px;background:#fff;color:#172033;outline:none}
+textarea{min-height:110px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:#5b8def;box-shadow:0 0 0 3px rgba(37,99,235,.11)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.view{display:none}.view.active{display:block}
+.alert{padding:11px 12px;border-radius:10px;margin:7px 0;font-size:12px;line-height:1.45}
+.ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+.warn{background:#fff8e7;border:1px solid #f8d38a;color:#8a4f00}
+.bad{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.list{display:grid;gap:8px}
+.item{border:1px solid #e1e8f1;border-radius:12px;padding:12px;background:#fff}
+.item b{display:block;margin-bottom:3px}.item ul,.item ol{margin:8px 0 0;padding-left:20px}.item li{margin:5px 0;line-height:1.45}
+.pillRow{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:5px 8px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:11px}
+.editorToolbar{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #e5ebf3}
+.editor{min-height:500px;outline:none;border:1px solid #cbd6e5;border-radius:12px;padding:24px;margin-top:11px;line-height:1.75;background:#fff}
+.editor h1,.editor h2,.editor h3{font-family:Georgia,serif;color:#0f2747}
+.editor p{text-align:justify}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;color:#64748b;margin-top:8px}
+.progress{height:8px;background:#e7edf5;border-radius:999px;overflow:hidden}.progress i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);width:0}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #dde5ef;padding:8px;text-align:left;vertical-align:top}th{background:#f7f9fc}
+.small{font-size:11px;color:#64748b}
+footer{margin-top:16px;padding:14px 2px 0;color:#64748b;font-size:12px}
+.footerLinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+dialog{border:0;border-radius:16px;padding:0;max-width:760px;width:94%;box-shadow:0 28px 80px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(5,15,30,.55)}
+.modal{padding:20px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{border:1px solid #d5deea;background:#fff;border-radius:999px;padding:8px 11px;font-weight:700}
+.tabs button.active{background:#eaf1ff;border-color:#bfd6ff;color:#1d4ed8}
+.hidden{display:none!important}
+
+/* floating tutor */
+.fab{
+ position:fixed;right:18px;bottom:84px;z-index:1000;border:0;border-radius:999px;padding:13px 16px;
+ background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff;font-weight:800;box-shadow:0 16px 34px rgba(37,99,235,.28)
+}
+.tutorPanel{
+ position:fixed;right:18px;bottom:146px;z-index:999;width:min(390px,calc(100vw - 22px));max-height:72vh;overflow:auto;
+ background:#fff;border:1px solid #dce4ef;border-radius:18px;box-shadow:0 20px 50px rgba(15,23,42,.18);display:none
+}
+.tutorPanel.active{display:block}
+.tutorHead{padding:16px;border-bottom:1px solid #e5edf5;background:linear-gradient(125deg,#07182d 0%,#103b6b 63%,#184f8d 100%);color:#fff;border-radius:18px 18px 0 0}
+.tutorBody{padding:16px}
+.tutorBody .item{background:#f9fbfe}
+
+/* mobile */
+.mobileTop{
+ display:none;position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#07182d 0%,#0c2c52 100%);
+ color:#fff;padding:calc(10px + var(--safe-top)) 14px 12px;border-bottom:1px solid rgba(255,255,255,.08)
+}
+.mobileTop .row{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.mobileBrand{display:flex;align-items:center;gap:10px;min-width:0}
+.mobileBrand svg{width:34px;height:34px;flex:0 0 auto}
+.mobileBrand .txt{min-width:0}
+.mobileBrand .txt b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobileBrand .txt small{display:block;color:#c7daee}
+.mobileMenu{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:8px 11px;font-weight:800}
+.mobileDrawer{
+ position:fixed;inset:0 0 auto auto;width:min(86vw,360px);height:100vh;background:#fff;z-index:1200;transform:translateX(104%);
+ transition:transform .25s ease;box-shadow:-20px 0 40px rgba(0,0,0,.18);padding:16px 14px calc(20px + var(--safe-bottom));overflow:auto
+}
+.mobileDrawer.open{transform:translateX(0)}
+.mobileDrawer .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.mobileDrawer button.drawerItem{
+ width:100%;text-align:left;border:1px solid #e4ebf4;background:#fff;border-radius:12px;padding:12px 12px;margin:5px 0;font-weight:700;color:#172033
+}
+.mobileBottom{
+ display:none;position:fixed;left:0;right:0;bottom:0;z-index:110;background:#fff;border-top:1px solid #dce4ef;
+ padding:8px 10px calc(8px + var(--safe-bottom));grid-template-columns:repeat(5,1fr);gap:6px
+}
+.mobileBottom button{border:0;background:transparent;padding:7px 4px;border-radius:10px;color:#475569;font-size:11px;font-weight:800}
+.mobileBottom button.active{background:#eaf1ff;color:#1d4ed8}
+.mobileBottom span{display:block;font-size:18px;line-height:1;margin-bottom:4px}
+
+@media(max-width:980px){
+  .app{grid-template-columns:1fr}
+  aside{display:none}
+  .mobileTop,.mobileBottom{display:grid}
+  main{padding:14px 14px 88px}
+  header.top{margin-top:6px}
+  .hero{grid-template-columns:1fr}
+  .c8,.c7,.c6,.c5,.c4,.c3{grid-column:span 12}
+  .two,.three{grid-template-columns:1fr}
+  .fab{right:14px;bottom:94px}
+  .tutorPanel{right:12px;bottom:154px}
+}
+@media print{
+  aside,.mobileTop,.mobileBottom,header.top,.fab,.tutorPanel,.no-print,.hero{display:none!important}
+  .view{display:none!important}
+  #editorView{display:block!important}
+  .app{display:block}
+  main{padding:0}
+  .card{box-shadow:none;border:0;padding:0}
+  .editor{border:0;min-height:auto;padding:0}
+}
+</style>
+</head>
+<body>
+<div class="mobileTop">
+  <div class="row">
+    <div class="mobileBrand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 42" aria-hidden="true">
+        <defs>
+          <linearGradient id="mb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+          <linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7c653"/><stop offset="1" stop-color="#c98a16"/></linearGradient>
+        </defs>
+        <path d="M6 26c5-2 10-1 14 3V17c-5-3-10-3-15-1v12l1-2Zm14 3c4-4 9-5 14-3l1 2V16c-5-2-10-2-15 1v12Z" fill="none" stroke="url(#mg)" stroke-width="2"/>
+        <path d="M8 12 20 7l12 5-12 5-12-5Z" fill="none" stroke="url(#mb)" stroke-width="2.4"/>
+        <path d="M31 23c4-5 6-10 6-15-4 2-8 6-11 12-1 3-2 6-2 8 2-2 4-4 7-5Z" fill="url(#mg)"/>
+        <text x="42" y="18" font-size="10" fill="#fff" font-family="Georgia,serif" font-weight="700">TCC &amp; Monografia</text>
+        <text x="42" y="30" font-size="8" fill="#f7c653" font-family="Arial,sans-serif" font-weight="800" letter-spacing="1.5">STUDIO 4.0</text>
+      </svg>
+      <div class="txt"><b>TCC & Monografia Studio</b><small>Assistente acadêmico e de desenvolvimento profissional</small></div>
+    </div>
+    <button class="mobileMenu" onclick="toggleDrawer()">Menu</button>
+  </div>
+</div>
+
+<div class="mobileDrawer" id="mobileDrawer">
+  <div class="head"><b>Menu</b><button class="btn ghost" onclick="toggleDrawer(false)">Fechar</button></div>
+  <button class="drawerItem" onclick="go('home');toggleDrawer(false)">Início</button>
+  <button class="drawerItem" onclick="go('project');toggleDrawer(false)">Meu Projeto</button>
+  <button class="drawerItem" onclick="go('structure');toggleDrawer(false)">Estrutura</button>
+  <button class="drawerItem" onclick="go('assistant');toggleDrawer(false)">Assistente</button>
+  <button class="drawerItem" onclick="go('editorView');toggleDrawer(false)">Editor Acadêmico</button>
+  <button class="drawerItem" onclick="go('sources');toggleDrawer(false)">Referências</button>
+  <button class="drawerItem" onclick="go('models');toggleDrawer(false)">Modelos por Área</button>
+  <button class="drawerItem" onclick="go('career');toggleDrawer(false)">Carreira & Pós</button>
+  <button class="drawerItem" onclick="go('commercial');toggleDrawer(false)">Licenciamento</button>
+  <button class="drawerItem" onclick="go('quality');toggleDrawer(false)">Qualidade</button>
+  <button class="drawerItem" onclick="go('backup');toggleDrawer(false)">Backup</button>
+  <button class="drawerItem" onclick="go('export');toggleDrawer(false)">Exportar</button>
+  <button class="drawerItem" onclick="showLegal('terms')">Termos de uso</button>
+  <button class="drawerItem" onclick="showLegal('privacy')">Política de privacidade</button>
+</div>
+
+<div class="app">
+<aside>
+  <div class="logoWrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 132" role="img" aria-labelledby="title desc" style="width:100%;height:auto;display:block">
+      <title id="title">TCC &amp; Monografia Studio 3.0</title>
+      <desc id="desc">Livro aberto com pena e capelo em azul e dourado.</desc>
+      <defs>
+        <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7c653"/><stop offset="1" stop-color="#c98a16"/></linearGradient>
+      </defs>
+      <g transform="translate(5 7)">
+        <path d="M22 77c23-7 43-2 57 12V42C58 30 38 30 17 38v50c2-5 3-8 5-11Z" fill="none" stroke="url(#g)" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M79 89c14-14 34-19 57-12 2 3 3 6 5 11V38c-21-8-41-8-62 4v47Z" fill="none" stroke="url(#g)" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M32 24 78 4l46 20-46 20L32 24Z" fill="none" stroke="url(#b)" stroke-width="7" stroke-linejoin="round"/>
+        <path d="M121 26v27" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+        <path d="M115 55c0 7 12 7 12 0" fill="none" stroke="#2563eb" stroke-width="4"/>
+        <path d="M112 75c17-23 22-44 23-60-17 9-31 25-42 47-6 13-8 25-8 36 8-8 17-16 27-23Z" fill="url(#g)"/>
+        <path d="M89 95c9-11 20-22 33-34" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/>
+      </g>
+      <text x="160" y="56" font-family="Georgia,serif" font-size="34" font-weight="700" fill="#0f2747">TCC &amp; Monografia</text>
+      <text x="162" y="89" font-family="Arial,sans-serif" font-size="20" font-weight="800" letter-spacing="5" fill="#c98a16">STUDIO 4.0</text>
+      <text x="162" y="112" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#64748b">assistente acadêmico • carreira • qualidade</text>
+    </svg>
+  </div>
+  <div class="version">VERSÃO 4.0 • PRO STANDALONE</div>
+  <div class="nav" id="desktopNav">
+    <button class="active" data-v="home"><span class="ico">⌂</span>Início</button>
+    <button data-v="project"><span class="ico">▣</span>Meu Projeto</button>
+    <button data-v="structure"><span class="ico">☷</span>Estrutura</button>
+    <button data-v="assistant"><span class="ico">✦</span>Assistente</button>
+    <button data-v="editorView"><span class="ico">✎</span>Editor Acadêmico</button>
+    <button data-v="sources"><span class="ico">▤</span>Referências</button>
+    <button data-v="models"><span class="ico">▦</span>Modelos por Área</button>
+    <button data-v="career"><span class="ico">⚑</span>Carreira & Pós</button>
+    <button data-v="commercial"><span class="ico">◆</span>Licenciamento</button>
+    <button data-v="quality"><span class="ico">✓</span>Qualidade</button>
+    <button data-v="timeline"><span class="ico">◷</span>Cronograma</button>
+    <button data-v="backup"><span class="ico">↺</span>Backup</button>
+    <button data-v="export"><span class="ico">⇩</span>Exportar</button>
+  </div>
+  <div class="sideNote">
+    🔒 Dados acadêmicos permanecem no navegador, salvo quando você decide exportá-los. A aplicação não envia conteúdo a servidores externos por padrão.<br><br>
+    © Copyright: <b>Nailson Rodrigues de Lima</b>
+  </div>
+</aside>
+
+<main>
+  <header class="top">
+    <div>
+      <h1 id="pageTitle">Início</h1>
+      <p id="subtitle">Assistente acadêmico e de desenvolvimento profissional, com validação humana.</p>
+    </div>
+    <div class="topActions">
+      <span class="badge" id="saveBadge">Salvo localmente</span>
+      <button class="btn ghost" onclick="showHelp()">Ajuda</button>
+      <button class="btn ghost" onclick="showLegal('terms')">Termos</button>
+      <button class="btn ghost" onclick="showLegal('privacy')">Privacidade</button>
+    </div>
+  </header>
+
+  <section id="home" class="view active">
+    <div class="hero">
+      <div>
+        <h2>Do tema à entrega, com método e visão de futuro.</h2>
+        <p>Planeje o trabalho, construa capítulos, organize referências, receba orientações contextuais, reflita sobre carreira, pós-graduação e caminhos de empregabilidade, sempre sem inventar fontes ou mascarar autoria.</p>
+      </div>
+      <ul>
+        <li>Estrutura acadêmica orientada</li>
+        <li>Tutor virtual com dicas contextuais</li>
+        <li>Carreira, pós-graduação e empregabilidade</li>
+        <li>Banco de modelos por área</li><li>Controle de qualidade e exportação</li>
+      </ul>
+    </div>
+    <div class="grid">
+      <div class="card c3"><div class="metric"><strong id="mProgress">0%</strong><span>completude estrutural</span></div></div>
+      <div class="card c3"><div class="metric"><strong id="mWords">0</strong><span>palavras no editor</span></div></div>
+      <div class="card c3"><div class="metric"><strong id="mRefs">0</strong><span>fontes cadastradas</span></div></div>
+      <div class="card c3"><div class="metric"><strong id="mFlags">0</strong><span>pendências detectadas</span></div></div>
+      <div class="card c7">
+        <h3>Próximo passo recomendado</h3>
+        <div id="nextStep" class="alert info"></div>
+        <div class="progress"><i id="progressBar"></i></div>
+      </div>
+      <div class="card c5">
+        <h3>Resumo do projeto</h3>
+        <div id="homeSummary" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="project" class="view">
+    <div class="card">
+      <h3>Meu Projeto</h3>
+      <div class="three">
+        <div><label>Tipo</label><select id="tipo"><option>TCC</option><option>Monografia</option><option>Artigo acadêmico</option><option>Projeto de pesquisa</option></select></div>
+        <div><label>Curso</label><input id="curso" placeholder="Ex.: Administração"></div>
+        <div><label>Instituição</label><input id="instituicao" placeholder="Instituição de ensino"></div>
+      </div>
+      <label>Tema</label><input id="tema" placeholder="Tema claro, delimitado e pesquisável">
+      <div class="two">
+        <div><label>Problema de pesquisa</label><textarea id="problema"></textarea></div>
+        <div><label>Hipótese / pressupostos (quando aplicável)</label><textarea id="hipotese"></textarea></div>
+      </div>
+      <div class="two">
+        <div><label>Objetivo geral</label><textarea id="objetivoG"></textarea></div>
+        <div><label>Objetivos específicos</label><textarea id="objetivosE" placeholder="Um por linha"></textarea></div>
+      </div>
+      <label>Justificativa / relevância</label><textarea id="justificativa"></textarea>
+      <label>Delimitação do estudo</label><textarea id="delimitacao" placeholder="População/corpus, local, período, recorte temático e exclusões"></textarea>
+      <div class="three">
+        <div><label>Abordagem</label><select id="abordagem"><option value="">Selecione</option><option>Qualitativa</option><option>Quantitativa</option><option>Mista</option><option>Não se aplica / a definir</option></select></div>
+        <div><label>Procedimento</label><select id="metodo"><option value="">Selecione</option><option>Revisão bibliográfica</option><option>Pesquisa documental</option><option>Estudo de caso</option><option>Pesquisa de campo</option><option>Pesquisa experimental</option><option>Outro / a definir</option></select></div>
+        <div><label>Norma institucional</label><input id="norma" placeholder="Ex.: ABNT + manual da instituição"></div>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="saveAll(true)">Salvar</button>
+        <button class="btn gold" onclick="buildStructure()">Gerar estrutura</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="structure" class="view">
+    <div class="grid">
+      <div class="card c8">
+        <h3>Estrutura do trabalho</h3>
+        <div id="outline" class="list"></div>
+        <div class="toolbar">
+          <button class="btn primary" onclick="buildStructure()">Regerar estrutura</button>
+          <button class="btn ghost" onclick="outlineToEditor()">Inserir títulos no editor</button>
+        </div>
+      </div>
+      <div class="card c4">
+        <h3>Validação institucional</h3>
+        <div class="alert warn">A estrutura sugerida é orientativa. O manual da instituição e as exigências do orientador prevalecem.</div>
+        <label>Observações do orientador</label><textarea id="orientadorObs" placeholder="Registre ajustes e exigências específicas."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section id="assistant" class="view">
+    <div class="grid">
+      <div class="card c5">
+        <h3>Assistente de redação acadêmica</h3>
+        <label>Seção</label>
+        <select id="assistSec">
+          <option>Introdução</option><option>Justificativa</option><option>Referencial teórico</option>
+          <option>Metodologia</option><option>Resultados</option><option>Discussão</option><option>Considerações finais</option>
+        </select>
+        <label>Objetivo da intervenção</label>
+        <select id="assistAction">
+          <option>Gerar estrutura de parágrafos</option>
+          <option>Reformular minhas notas</option>
+          <option>Expandir com cautela</option>
+          <option>Resumir minhas notas</option>
+          <option>Gerar perguntas de revisão</option>
+        </select>
+        <label>Notas, fatos e evidências fornecidas pelo autor</label>
+        <textarea id="assistNotes" style="min-height:190px" placeholder="Cole aqui apenas informações que você conhece, observou ou possui fonte para sustentar."></textarea>
+        <div class="toolbar">
+          <button class="btn primary" onclick="assist()">Processar</button>
+          <button class="btn ghost" onclick="assistantToEditor()">Enviar ao editor</button>
+        </div>
+        <div class="alert info">A aplicação não inventa autores, dados, resultados ou referências. Quando faltar sustentação, marca o ponto para validação.</div>
+      </div>
+      <div class="card c7">
+        <h3>Resultado assistido</h3>
+        <textarea id="assistOut" style="min-height:490px"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section id="editorView" class="view">
+    <div class="card">
+      <h3>Editor Acadêmico</h3>
+      <div class="editorToolbar no-print">
+        <button class="btn ghost" onclick="fmt('bold')"><b>B</b></button>
+        <button class="btn ghost" onclick="fmt('italic')"><i>I</i></button>
+        <button class="btn ghost" onclick="fmt('underline')"><u>U</u></button>
+        <button class="btn ghost" onclick="block('h2')">Título 2</button>
+        <button class="btn ghost" onclick="block('h3')">Título 3</button>
+        <button class="btn ghost" onclick="fmt('insertUnorderedList')">Lista</button>
+        <button class="btn ghost" onclick="insertValidation()">⚑ Validação</button>
+        <button class="btn ghost" onclick="findRepeats()">Repetições</button>
+      </div>
+      <div id="editor" class="editor" contenteditable="true" spellcheck="true"></div>
+      <div class="status">
+        <span id="wordStat">0 palavras</span>
+        <span id="charStat">0 caracteres</span>
+        <span id="pageStat">~0 páginas</span>
+        <span id="readStat">~0 min de leitura</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="sources" class="view">
+    <div class="grid">
+      <div class="card c5">
+        <h3>Nova referência</h3>
+        <label>Tipo</label>
+        <select id="rType"><option>Livro</option><option>Artigo científico</option><option>Site</option><option>Documento institucional</option><option>Norma / legislação</option><option>Tese / dissertação</option><option>Outro</option></select>
+        <label>Autor / entidade</label><input id="rAuthor">
+        <label>Título</label><input id="rTitle">
+        <div class="two">
+          <div><label>Ano</label><input id="rYear" maxlength="4"></div>
+          <div><label>Data de acesso</label><input id="rAccess" type="date"></div>
+        </div>
+        <label>Periódico / editora / instituição</label><input id="rContainer">
+        <label>URL / DOI</label><input id="rUrl">
+        <label>Complemento</label><textarea id="rExtra" placeholder="Edição, volume, número, páginas, cidade etc."></textarea>
+        <div class="toolbar"><button class="btn primary" onclick="addRef()">Adicionar</button></div>
+      </div>
+      <div class="card c7"><h3>Biblioteca de fontes</h3><div id="refs" class="list"></div></div>
+    </div>
+  </section>
+
+
+  <section id="models" class="view">
+    <div class="grid">
+      <div class="card c4">
+        <h3>Banco de Modelos por Área</h3>
+        <label>Área principal</label>
+        <select id="modelArea" onchange="renderModels()">
+          <option value="tecnologia">Tecnologia / Sistemas / Computação</option>
+          <option value="educacao">Educação / Pedagogia / Licenciaturas</option>
+          <option value="gestao">Administração / Gestão / RH</option>
+          <option value="saude">Saúde</option>
+          <option value="direito">Direito</option>
+          <option value="geral">Modelo geral interdisciplinar</option>
+        </select>
+        <label>Tipo de trabalho</label>
+        <select id="modelType" onchange="renderModels()">
+          <option>TCC</option>
+          <option>Monografia</option>
+          <option>Artigo acadêmico</option>
+          <option>Projeto de pesquisa</option>
+        </select>
+        <div class="toolbar">
+          <button class="btn primary" onclick="applySelectedModel()">Aplicar ao projeto</button>
+          <button class="btn ghost" onclick="copyModel()">Copiar modelo</button>
+        </div>
+        <div class="alert info">Os modelos são estruturas orientativas e devem ser adaptados às regras da instituição e às orientações do professor/orientador.</div>
+      </div>
+      <div class="card c8">
+        <h3>Modelo recomendado</h3>
+        <div id="modelPreview" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="career" class="view">
+    <div class="grid">
+      <div class="card c5">
+        <h3>Carreira, formação continuada e empregabilidade</h3>
+        <label>Minha formação / curso</label><input id="careerCourse" placeholder="Ex.: Administração, Pedagogia, Direito, Enfermagem, TI">
+        <div class="two">
+          <div><label>Cidade / estado</label><input id="careerLocation" placeholder="Ex.: Brasília/DF"></div>
+          <div><label>Área de interesse</label><input id="careerInterest" placeholder="Ex.: setor público, RH, tecnologia educacional"></div>
+        </div>
+        <label>Objetivo profissional</label>
+        <select id="careerGoal">
+          <option>Primeiro emprego</option>
+          <option>Estágio</option>
+          <option>Setor público / concursos</option>
+          <option>Emprego privado</option>
+          <option>Pesquisa / docência</option>
+          <option>Empreender</option>
+          <option>Pós-graduação</option>
+        </select>
+        <div class="toolbar">
+          <button class="btn primary" onclick="careerGuide()">Gerar orientações</button>
+          <button class="btn ghost" onclick="copyCareerGuide()">Copiar resultado</button>
+        </div>
+        <div class="alert info">As sugestões são orientativas e devem ser confirmadas pelo usuário. O objetivo é ampliar a visão de futuro e facilitar a busca por oportunidades.</div>
+      </div>
+      <div class="card c7">
+        <h3>Orientações sugeridas</h3>
+        <div class="tabs">
+          <button class="active" data-tab="careerOut1" onclick="switchTab(this,'careerOut1')">Carreira</button>
+          <button data-tab="careerOut2" onclick="switchTab(this,'careerOut2')">Aprendizagem</button>
+          <button data-tab="careerOut3" onclick="switchTab(this,'careerOut3')">Pós-graduação</button>
+          <button data-tab="careerOut4" onclick="switchTab(this,'careerOut4')">Onde buscar emprego</button>
+        </div>
+        <div id="careerOut1"></div>
+        <div id="careerOut2" class="hidden"></div>
+        <div id="careerOut3" class="hidden"></div>
+        <div id="careerOut4" class="hidden"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="commercial" class="view">
+    <div class="grid">
+      <div class="card c5">
+        <h3>Painel de Licenciamento</h3>
+        <p class="muted">Sugestões comerciais para posicionar a aplicação. Os valores são parâmetros editáveis e não constituem avaliação contábil ou garantia de faturamento.</p>
+        <label>Modelo comercial</label>
+        <select id="licenseModel" onchange="renderCommercial()">
+          <option value="student">Estudante individual</option>
+          <option value="pro">Plano Pro</option>
+          <option value="teacher">Professor / orientador</option>
+          <option value="institution">Instituição de ensino</option>
+          <option value="perpetual">Licença standalone perpétua</option>
+          <option value="source">Licença de código-fonte</option>
+        </select>
+        <label>Quantidade estimada de licenças</label>
+        <input type="number" id="licenseQty" min="1" value="10" oninput="renderCommercial()">
+        <div class="toolbar">
+          <button class="btn primary" onclick="renderCommercial()">Atualizar proposta</button>
+          <button class="btn ghost" onclick="copyCommercial()">Copiar proposta</button>
+        </div>
+      </div>
+      <div class="card c7">
+        <h3>Proposta sugerida</h3>
+        <div id="commercialOut"></div>
+      </div>
+      <div class="card c12">
+        <h3>Itens que aumentam o valor percebido</h3>
+        <div class="three">
+          <div class="item"><b>Produto</b><div class="muted">Interface consistente, estabilidade mobile, documentação, identidade visual própria e atualizações versionadas.</div></div>
+          <div class="item"><b>Serviço</b><div class="muted">Implantação, treinamento, suporte, SLA, customização institucional e white-label.</div></div>
+          <div class="item"><b>Confiança</b><div class="muted">Termos claros, privacidade, integridade acadêmica, rastreabilidade de fontes e limites explícitos do sistema.</div></div>
+        </div>
+      </div>
+    
+      <div class="card c12">
+        <h3>Gerador de buscas profissionais e acadêmicas</h3>
+        <div class="three">
+          <div>
+            <label>Palavra-chave profissional</label>
+            <input id="jobKeyword" placeholder="Ex.: analista de sistemas, pedagogo, enfermeiro">
+          </div>
+          <div>
+            <label>Localidade</label>
+            <input id="jobLocation" placeholder="Ex.: Brasília/DF">
+          </div>
+          <div>
+            <label>Tipo de oportunidade</label>
+            <select id="jobKind">
+              <option>Emprego</option><option>Estágio</option><option>Trainee</option><option>Concurso</option><option>Residência</option><option>Docência</option>
+            </select>
+          </div>
+        </div>
+        <div class="toolbar"><button class="btn primary" onclick="buildSearchQueries()">Gerar buscas</button></div>
+        <div id="queryOut" class="list" style="margin-top:10px"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="quality" class="view">
+    <div class="grid">
+      <div class="card c4">
+        <h3>Controle de Qualidade 4.0</h3>
+        <p class="muted">Analisa completude, marcadores pendentes, repetição de parágrafos, linguagem absoluta, coerência básica entre projeto, texto, fontes e orientações gerais.</p>
+        <button class="btn good" onclick="runQuality()">Executar análise</button>
+      </div>
+      <div class="card c8">
+        <h3>Relatório técnico</h3>
+        <div id="qa"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="timeline" class="view">
+    <div class="card">
+      <h3>Cronograma</h3>
+      <div class="three">
+        <div><label>Etapa</label><input id="taskName" placeholder="Ex.: revisão bibliográfica"></div>
+        <div><label>Prazo</label><input type="date" id="taskDate"></div>
+        <div><label>Status</label><select id="taskStatus"><option>Planejado</option><option>Em andamento</option><option>Concluído</option></select></div>
+      </div>
+      <div class="toolbar"><button class="btn primary" onclick="addTask()">Adicionar etapa</button></div>
+      <div id="tasks" class="list" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section id="backup" class="view">
+    <div class="grid">
+      <div class="card c6">
+        <h3>Backup do projeto</h3>
+        <p class="muted">Exporte todos os dados, conteúdo, referências, cronograma e orientações em JSON.</p>
+        <div class="toolbar">
+          <button class="btn dark" onclick="exportBackup()">Exportar backup</button>
+          <label class="btn ghost" style="display:inline-block;margin:0">Importar backup<input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)"></label>
+        </div>
+      </div>
+      <div class="card c6">
+        <h3>Pontos de restauração</h3>
+        <div class="toolbar"><button class="btn ghost" onclick="createSnapshot()">Criar ponto de restauração</button></div>
+        <div id="snapshots" class="list" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="export" class="view">
+    <div class="grid">
+      <div class="card c6">
+        <h3>Exportar trabalho</h3>
+        <p class="muted">Gere uma cópia portável do conteúdo. A impressão do navegador permite salvar em PDF. O formato .doc é compatível com editores tradicionais, embora a conversão final deva ser conferida.</p>
+        <div class="toolbar">
+          <button class="btn primary" onclick="window.print()">Salvar / imprimir PDF</button>
+          <button class="btn dark" onclick="exportDoc()">Exportar .doc</button>
+          <button class="btn ghost" onclick="exportHtml()">Exportar HTML</button>
+          <button class="btn ghost" onclick="exportTxt()">Exportar TXT</button>
+        </div>
+      </div>
+      <div class="card c6">
+        <h3>Checklist de entrega</h3>
+        <div id="finalCheck" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>© Copyright: <b>Nailson Rodrigues de Lima</b> • TCC & Monografia Studio 4.0</div>
+    <div class="footerLinks">
+      <a href="#" onclick="showLegal('terms');return false;">Termos de uso</a>
+      <a href="#" onclick="showLegal('privacy');return false;">Política de privacidade</a>
+    </div>
+  </footer>
+</main>
+</div>
+
+<button class="fab" onclick="toggleTutor()">🎓 Tutor virtual</button>
+<div class="tutorPanel" id="tutorPanel">
+  <div class="tutorHead">
+    <b>Tutor Virtual</b><br>
+    <span class="small" style="color:#dbe8f7">Dicas importantes, aplicação da profissão e próximos passos.</span>
+  </div>
+  <div class="tutorBody" id="tutorBody"></div>
+</div>
+
+<div class="mobileBottom">
+  <button class="active" data-v="home" onclick="go('home')"><span>⌂</span>Início</button>
+  <button data-v="project" onclick="go('project')"><span>▣</span>Projeto</button>
+  <button data-v="assistant" onclick="go('assistant')"><span>✦</span>Assist.</button>
+  <button data-v="career" onclick="go('career')"><span>⚑</span>Carreira</button>
+  <button data-v="export" onclick="go('export')"><span>⇩</span>Exportar</button>
+</div>
+
+<dialog id="help">
+  <div class="modal">
+    <h3>Como usar a V3.0</h3>
+    <p class="muted">Comece em <b>Meu Projeto</b>, gere a estrutura, cadastre as fontes reais e use o Assistente como apoio editorial. No módulo <b>Carreira & Pós</b>, informe sua formação para receber sugestões orientativas. Use o <b>Tutor Virtual</b> para enxergar lacunas e próximos passos.</p>
+    <div class="alert warn">O sistema não substitui orientador, banca, manual institucional, revisão metodológica, decisão profissional individual nem validação de citações e programas acadêmicos.</div>
+    <button class="btn primary" onclick="$('help').close()">Fechar</button>
+  </div>
+</dialog>
+
+<dialog id="legal">
+  <div class="modal" id="legalContent"></div>
+</dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const IDs = ['tipo','curso','instituicao','tema','problema','hipotese','objetivoG','objetivosE','justificativa','delimitacao','abordagem','metodo','norma','orientadorObs','careerCourse','careerLocation','careerInterest','careerGoal'];
+let refs = [], tasks = [], outline = [], snapshots = [], lastPick = {};
+document.querySelectorAll('#desktopNav button').forEach(b => b.onclick = () => go(b.dataset.v));
+
+const titles = {
+  home:'Início', project:'Meu Projeto', structure:'Estrutura', assistant:'Assistente',
+  editorView:'Editor Acadêmico', sources:'Referências', models:'Modelos por Área', career:'Carreira & Pós', commercial:'Licenciamento',
+  quality:'Qualidade', timeline:'Cronograma', backup:'Backup', export:'Exportar'
+};
+
+function go(id){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('#desktopNav button').forEach(b => b.classList.toggle('active', b.dataset.v===id));
+  document.querySelectorAll('.mobileBottom button').forEach(b => b.classList.toggle('active', b.dataset.v===id));
+  $('pageTitle').textContent = titles[id] || '';
+  $('subtitle').textContent = id==='career'
+    ? 'Módulo de formação continuada, pós-graduação e empregabilidade.'
+    : 'Assistente acadêmico e de desenvolvimento profissional, com validação humana.';
+  if(id==='home') refreshHome();
+  if(id==='export') renderFinal();
+  if(id==='backup') renderSnapshots();
+  updateTutor();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function toggleDrawer(force){
+  const dr = $('mobileDrawer');
+  const open = typeof force === 'boolean' ? force : !dr.classList.contains('open');
+  dr.classList.toggle('open', open);
+}
+function showHelp(){ $('help').showModal(); }
+function toggleTutor(){ $('tutorPanel').classList.toggle('active'); updateTutor(); }
+
+function v(id){ return ($(id)?.value || '').trim(); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function text(){ return $('editor').innerText.trim(); }
+function wordCount(t=text()){ return t ? t.split(/\s+/).filter(Boolean).length : 0; }
+function pick(k,a){ let i=Math.floor(Math.random()*a.length); if(a.length>1 && lastPick[k]===i) i=(i+1)%a.length; lastPick[k]=i; return a[i]; }
+
+function dataObject(){
+  let d={}; IDs.forEach(id => d[id] = $(id)?.value || '');
+  return {...d, editor:$('editor').innerHTML, refs, tasks, outline, snapshots, version:'4.0', savedAt:new Date().toISOString()};
+}
+function applyData(d){
+  IDs.forEach(id => { if($(id) && d[id] != null) $(id).value = d[id]; });
+  $('editor').innerHTML = d.editor || '';
+  refs = Array.isArray(d.refs)?d.refs:[];
+  tasks = Array.isArray(d.tasks)?d.tasks:[];
+  outline = Array.isArray(d.outline)?d.outline:[];
+  snapshots = Array.isArray(d.snapshots)?d.snapshots:[];
+  renderRefs(); renderTasks(); renderOutline(); stats(); refreshHome(); updateTutor();
+}
+function saveAll(show=false){
+  localStorage.setItem('tccStudioV4', JSON.stringify(dataObject()));
+  $('saveBadge').textContent = show ? 'Projeto salvo' : 'Salvo localmente';
+  setTimeout(() => $('saveBadge').textContent = 'Salvo localmente', 1000);
+  refreshHome(); updateTutor();
+}
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem('tccStudioV4') || 'null');
+    if(d) applyData(d);
+  }catch(e){}
+  renderRefs(); renderTasks(); renderOutline(); stats(); refreshHome(); updateTutor();
+}
+let timer;
+document.addEventListener('input', () => {
+  $('saveBadge').textContent = 'Alterações pendentes';
+  stats();
+  clearTimeout(timer);
+  timer = setTimeout(saveAll, 700);
+});
+
+function completion(){
+  const checks = [v('tema'),v('problema'),v('objetivoG'),v('objetivosE'),v('justificativa'),v('delimitacao'),v('metodo'),outline.length,text().length>250,refs.length>0];
+  return Math.round(checks.filter(Boolean).length/checks.length*100);
+}
+function pendingCount(){
+  let n=0;
+  if(!v('tema'))n++;
+  if(!v('problema'))n++;
+  if(!v('objetivoG'))n++;
+  if(!v('metodo'))n++;
+  if(!refs.length)n++;
+  n += (text().match(/\[VALIDAR[^\]]*\]/gi)||[]).length;
+  return n;
+}
+function refreshHome(){
+  const p = completion();
+  $('mProgress').textContent = p+'%';
+  $('progressBar').style.width = p+'%';
+  $('mWords').textContent = wordCount();
+  $('mRefs').textContent = refs.length;
+  $('mFlags').textContent = pendingCount();
+  let next = !v('tema') ? 'Defina o tema e a delimitação do estudo.'
+           : !v('problema') ? 'Formule o problema de pesquisa.'
+           : !outline.length ? 'Gere a estrutura do trabalho.'
+           : !refs.length ? 'Cadastre as fontes reais que sustentam o trabalho.'
+           : wordCount()<250 ? 'Inicie a redação no Editor Acadêmico.'
+           : 'Execute o Controle de Qualidade antes de exportar.';
+  $('nextStep').textContent = next;
+  $('homeSummary').innerHTML =
+    '<b>'+esc(v('tema')||'Tema ainda não definido')+'</b><br>'+
+    esc(v('tipo')||'Trabalho acadêmico')+
+    (v('curso') ? ' • '+esc(v('curso')) : '')+
+    (v('instituicao') ? '<br>'+esc(v('instituicao')) : '')+
+    '<br>'+refs.length+' fonte(s) • '+tasks.length+' etapa(s) no cronograma.';
+}
+function stats(){
+  const w = wordCount(), c = text().length;
+  $('wordStat').textContent = w+' palavras';
+  $('charStat').textContent = c+' caracteres';
+  $('pageStat').textContent = '~'+(w ? Math.max(1,Math.ceil(w/450)) : 0)+' páginas';
+  $('readStat').textContent = '~'+(w ? Math.max(1,Math.ceil(w/200)) : 0)+' min de leitura';
+  $('mWords').textContent = w;
+}
+
+function buildStructure(){
+  const method = v('metodo') || 'metodologia a definir';
+  outline = [
+    ['1. Introdução','Contextualização, problema, objetivos, justificativa, delimitação e organização do trabalho.'],
+    ['2. Referencial teórico','Conceitos, modelos e estudos anteriores efetivamente consultados.'],
+    ['3. Metodologia','Detalhamento do desenho metodológico: '+method+', critérios, fontes/instrumentos, análise, limitações e ética quando aplicável.'],
+    ['4. Resultados / análise','Apresentação dos achados reais, sem preencher lacunas com dados presumidos.'],
+    ['5. Discussão','Interpretação crítica dos achados em diálogo com a literatura cadastrada.'],
+    ['6. Considerações finais','Resposta ao problema, alcance dos objetivos, limitações e recomendações.'],
+    ['Referências','Somente obras efetivamente consultadas e citadas.']
+  ];
+  renderOutline(); saveAll(); go('structure');
+}
+function renderOutline(){
+  $('outline').innerHTML = outline.length
+    ? outline.map(x => '<div class="item"><b>'+esc(x[0])+'</b><div class="muted">'+esc(x[1])+'</div></div>').join('')
+    : '<div class="muted">Estrutura ainda não gerada.</div>';
+}
+function outlineToEditor(){
+  if(!outline.length) buildStructure();
+  $('editor').innerHTML += (text()?'<hr>':'') + outline.map(x => '<h2>'+esc(x[0])+'</h2><p>[VALIDAR CONTEÚDO] '+esc(x[1])+'</p>').join('');
+  saveAll(); stats(); go('editorView');
+}
+
+function assist(){
+  const sec=v('assistSec'), act=v('assistAction'), notes=v('assistNotes');
+  const theme=v('tema')||'[tema a definir]', prob=v('problema')||'[problema a definir]', obj=v('objetivoG')||'[objetivo geral a definir]', method=v('metodo')||'[método a definir]';
+  const starts = {
+    'Introdução':[
+      'O texto introdutório pode partir da contextualização de '+theme+' e conduzir, progressivamente, ao problema de pesquisa: '+prob+'.',
+      'A abertura do trabalho deve situar '+theme+' e explicitar a questão investigada: '+prob+'.'
+    ],
+    'Justificativa':[
+      'A justificativa deve demonstrar a relevância acadêmica, social ou profissional de investigar '+theme+'.',
+      'A pertinência do estudo precisa ser sustentada por necessidades ou lacunas verificáveis relacionadas a '+theme+'.'
+    ],
+    'Referencial teórico':[
+      'O referencial deve organizar, comparar e problematizar fontes reais relacionadas a '+theme+'.',
+      'A fundamentação teórica precisa articular conceitos e evidências verificáveis, evitando mera sequência de citações.'
+    ],
+    'Metodologia':[
+      'O percurso metodológico deve permanecer coerente com o objetivo geral — '+obj+' — e com o procedimento informado: '+method+'.',
+      'A metodologia deve explicar como o estudo buscará responder ao problema, detalhando '+method+' e seus critérios.'
+    ],
+    'Resultados':[
+      'Esta seção deve conter somente achados realmente produzidos ou coletados pelo estudo.',
+      'Os resultados devem ser apresentados de maneira verificável e alinhada aos objetivos específicos.'
+    ],
+    'Discussão':[
+      'A discussão deve interpretar os achados e confrontá-los com as fontes efetivamente utilizadas.',
+      'A interpretação precisa distinguir resultado observado, inferência e comparação com a literatura.'
+    ],
+    'Considerações finais':[
+      'O encerramento deve responder ao problema e demonstrar em que medida os objetivos foram alcançados.',
+      'As considerações finais devem sintetizar os achados sem introduzir resultados novos.'
+    ]
+  };
+  let out = [pick(sec, starts[sec] || starts['Introdução'])];
+  if(act === 'Gerar perguntas de revisão'){
+    out = [
+      'Perguntas de revisão para '+sec+':',
+      '1. O trecho responde diretamente ao problema de pesquisa?',
+      '2. Cada afirmação factual está sustentada por evidência verificável?',
+      '3. Há distinção clara entre dados, interpretação e recomendação?',
+      '4. O conteúdo contribui para o objetivo geral ('+obj+')?',
+      '5. Existem generalizações que precisam ser delimitadas?',
+      '6. As fontes citadas aparecem na lista de referências?'
+    ];
+  }else if(notes){
+    if(act === 'Resumir minhas notas') out.push('Síntese das notas fornecidas pelo autor: '+notes.split(/\s+/).slice(0,90).join(' ')+(notes.split(/\s+/).length>90?'…':''));
+    else if(act === 'Reformular minhas notas') out.push('A partir das informações fornecidas pelo autor, pode-se estruturar o argumento nos seguintes termos: '+notes);
+    else if(act === 'Expandir com cautela') out.push('As notas registradas apontam: '+notes+'\n\n[VALIDAR FONTES] Desenvolva relações conceituais adicionais somente quando houver fontes ou evidências que as sustentem.');
+    else out.push('Pontos de desenvolvimento a partir das notas do autor:\n• '+notes.replace(/\n+/g,'\n• '));
+  }else{
+    out.push('[VALIDAR CONTEÚDO] Nenhuma nota ou evidência foi fornecida. Insira material próprio e fontes reais antes de transformar esta estrutura em texto final.');
+  }
+  out.push('Revise o resultado quanto à precisão, autoria, adequação metodológica e normas da instituição.');
+  $('assistOut').value = out.join('\n\n');
+}
+function assistantToEditor(){
+  let s = v('assistOut');
+  if(!s) return;
+  $('editor').innerHTML += '<h2>'+esc(v('assistSec'))+'</h2>' + s.split(/\n\s*\n/).map(p => '<p>'+esc(p)+'</p>').join('');
+  saveAll(); go('editorView'); stats();
+}
+function fmt(c){ document.execCommand(c,false,null); $('editor').focus(); saveAll(); }
+function block(t){ document.execCommand('formatBlock',false,t); $('editor').focus(); saveAll(); }
+function insertValidation(){ document.execCommand('insertText',false,'[VALIDAR FONTE/DADO] '); saveAll(); }
+function normalize(s){ return s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim(); }
+function repeatPairs(){
+  const paras = [...$('editor').querySelectorAll('p')].map(p => p.innerText.trim()).filter(x => x.split(/\s+/).length >= 8);
+  let hits = [];
+  for(let i=0;i<paras.length;i++){
+    for(let j=i+1;j<paras.length;j++){
+      let a=new Set(normalize(paras[i]).split(' ')), b=new Set(normalize(paras[j]).split(' '));
+      let inter=[...a].filter(x=>b.has(x)).length, uni=new Set([...a,...b]).size, sim=uni?inter/uni:0;
+      if(sim>=.72) hits.push([i+1,j+1,Math.round(sim*100)]);
+    }
+  }
+  return hits;
+}
+function findRepeats(){
+  let h = repeatPairs();
+  alert(h.length ? 'Possíveis parágrafos semelhantes: '+h.map(x=>x[0]+' e '+x[1]+' ('+x[2]+'%)').join('; ') : 'Nenhum parágrafo muito semelhante foi detectado pelo verificador local.');
+}
+
+function addRef(){
+  let r={type:v('rType'),author:v('rAuthor'),title:v('rTitle'),year:v('rYear'),access:v('rAccess'),container:v('rContainer'),url:v('rUrl'),extra:v('rExtra')};
+  if(!r.author||!r.title){ alert('Informe autor/entidade e título.'); return; }
+  refs.push(r);
+  ['rAuthor','rTitle','rYear','rAccess','rContainer','rUrl','rExtra'].forEach(id => $(id).value='');
+  renderRefs(); saveAll();
+}
+function formatRef(r){
+  let s = r.author+'. '+r.title+'.';
+  if(r.container) s += ' '+r.container+'.';
+  if(r.year) s += ' '+r.year+'.';
+  if(r.extra) s += ' '+r.extra+'.';
+  if(r.url) s += ' Disponível em: '+r.url+'.';
+  if(r.access) s += ' Acesso em: '+r.access.split('-').reverse().join('/')+'.';
+  return s.replace(/\s+/g,' ').trim();
+}
+function renderRefs(){
+  $('mRefs').textContent = refs.length;
+  $('refs').innerHTML = refs.length
+    ? refs.map((r,i)=>'<div class="item"><div style="line-height:1.55">'+esc(formatRef(r))+'</div><div class="small">'+esc(r.type)+'</div><div class="toolbar"><button class="btn ghost" onclick="copyRef('+i+')">Copiar</button><button class="btn danger" onclick="delRef('+i+')">Remover</button></div></div>').join('')
+    : '<div class="muted">Nenhuma fonte cadastrada.</div>';
+}
+function delRef(i){ refs.splice(i,1); renderRefs(); saveAll(); }
+function copyRef(i){ navigator.clipboard?.writeText(formatRef(refs[i])).then(()=>alert('Referência copiada.')).catch(()=>alert(formatRef(refs[i]))); }
+
+function detectArea(course){
+  const c = (course || v('careerCourse') || v('curso') || '').toLowerCase();
+  if(/admin|gest|recursos humanos|conta|econom/.test(c)) return 'gestao';
+  if(/pedagog|licenc|educa|hist|geo|letras|matem|biolog/.test(c)) return 'educacao';
+  if(/direit|jurid|advoc/.test(c)) return 'direito';
+  if(/enferm|medic|sa[uú]de|psicol|fisiot|nutri|farm/.test(c)) return 'saude';
+  if(/ti|tecnolog|sistema|computa|software|dados|redes|inform/.test(c)) return 'tecnologia';
+  return 'geral';
+}
+
+const modelBank = {
+  tecnologia:{
+    title:'Tecnologia / Sistemas / Computação',
+    topics:[
+      'Avaliação de desempenho e confiabilidade de aplicações web',
+      'Automação de processos com foco em eficiência e rastreabilidade',
+      'Interoperabilidade de sistemas e integração de dados',
+      'Segurança da informação aplicada a ambientes corporativos',
+      'Experiência do usuário em sistemas de serviço público'
+    ],
+    outline:[
+      ['Introdução','Contexto tecnológico, problema, objetivos, relevância e delimitação.'],
+      ['Fundamentação','Arquitetura, padrões, tecnologias e estudos relacionados.'],
+      ['Metodologia','Ambiente, instrumentos, critérios de teste e análise.'],
+      ['Implementação / estudo','Descrição da solução, fluxo, componentes e decisões.'],
+      ['Resultados','Métricas, achados, limitações e evidências.'],
+      ['Discussão','Comparação com requisitos e literatura.'],
+      ['Conclusão','Síntese, limites e trabalhos futuros.']
+    ]
+  },
+  educacao:{
+    title:'Educação / Pedagogia / Licenciaturas',
+    topics:[
+      'Estratégias pedagógicas para aprendizagem significativa',
+      'Tecnologias digitais como apoio à prática docente',
+      'Avaliação formativa e acompanhamento do desenvolvimento',
+      'Inclusão e acessibilidade no contexto escolar',
+      'Formação continuada de professores'
+    ],
+    outline:[
+      ['Introdução','Contexto educacional, problema, objetivos e relevância.'],
+      ['Referencial teórico','Aprendizagem, currículo, avaliação e autores pertinentes.'],
+      ['Metodologia','Contexto, participantes/corpus, instrumentos e ética.'],
+      ['Análise','Achados pedagógicos ou documentais.'],
+      ['Discussão','Relação entre achados, prática e literatura.'],
+      ['Considerações finais','Contribuições, limites e recomendações educacionais.']
+    ]
+  },
+  gestao:{
+    title:'Administração / Gestão / RH',
+    topics:[
+      'Gestão por processos e melhoria contínua',
+      'Qualidade de vida no trabalho e produtividade',
+      'Indicadores de desempenho organizacional',
+      'Transformação digital em processos administrativos',
+      'Gestão de pessoas e desenvolvimento de competências'
+    ],
+    outline:[
+      ['Introdução','Problema organizacional, objetivos e relevância.'],
+      ['Referencial','Gestão, processos, pessoas e indicadores.'],
+      ['Metodologia','Estudo de caso, pesquisa documental ou levantamento.'],
+      ['Diagnóstico','Cenário atual, evidências e indicadores.'],
+      ['Proposta / análise','Interpretação e alternativas de melhoria.'],
+      ['Conclusão','Contribuições, limitações e recomendações.']
+    ]
+  },
+  saude:{
+    title:'Saúde',
+    topics:[
+      'Qualidade e segurança em serviços de saúde',
+      'Gestão da informação em saúde',
+      'Educação em saúde e adesão ao cuidado',
+      'Tecnologias digitais aplicadas à assistência',
+      'Gestão de processos e indicadores em saúde'
+    ],
+    outline:[
+      ['Introdução','Problema em saúde, justificativa e objetivos.'],
+      ['Referencial','Conceitos clínicos, assistenciais ou de gestão pertinentes.'],
+      ['Metodologia','Desenho, população/corpus, critérios e aspectos éticos.'],
+      ['Resultados','Achados verificados.'],
+      ['Discussão','Interpretação à luz das evidências.'],
+      ['Conclusão','Síntese, limites e implicações.']
+    ]
+  },
+  direito:{
+    title:'Direito',
+    topics:[
+      'Proteção de dados e responsabilidade jurídica',
+      'Acesso à justiça e transformação digital',
+      'Compliance e integridade organizacional',
+      'Políticas públicas e efetividade normativa',
+      'Métodos adequados de solução de conflitos'
+    ],
+    outline:[
+      ['Introdução','Problema jurídico, delimitação, objetivos e relevância.'],
+      ['Fundamentação','Doutrina, normas, jurisprudência e estudos pertinentes.'],
+      ['Metodologia','Pesquisa bibliográfica, documental ou estudo de caso.'],
+      ['Análise jurídica','Interpretação do problema com base nas fontes.'],
+      ['Discussão','Limites, controvérsias e implicações.'],
+      ['Conclusão','Síntese e resposta ao problema.']
+    ]
+  },
+  geral:{
+    title:'Modelo geral interdisciplinar',
+    topics:[
+      'Análise de um problema aplicado na área de formação',
+      'Avaliação de práticas e processos profissionais',
+      'Impactos da transformação digital na profissão',
+      'Qualidade, inovação e melhoria contínua',
+      'Competências profissionais e desafios contemporâneos'
+    ],
+    outline:[
+      ['Introdução','Contexto, problema, objetivos e delimitação.'],
+      ['Referencial teórico','Conceitos e estudos relacionados.'],
+      ['Metodologia','Procedimentos e critérios.'],
+      ['Resultados / análise','Achados e interpretação.'],
+      ['Discussão','Diálogo com a literatura.'],
+      ['Conclusão','Síntese, limites e recomendações.']
+    ]
+  }
+};
+
+function renderModels(){
+  const key = v('modelArea') || 'tecnologia';
+  const d = modelBank[key] || modelBank.geral;
+  const typ = v('modelType') || 'TCC';
+  $('modelPreview').innerHTML = `
+    <div class="item"><b>${esc(d.title)} • ${esc(typ)}</b>
+      <div class="muted">Temas de partida:</div>
+      <ul>${d.topics.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul>
+    </div>
+    <div class="item"><b>Estrutura recomendada</b>
+      <ol>${d.outline.map(x=>'<li><b>'+esc(x[0])+'</b> — '+esc(x[1])+'</li>').join('')}</ol>
+    </div>
+    <div class="item"><b>Uso responsável</b><div class="muted">O tema final deve ser específico, viável e validado com o orientador. O modelo não substitui o projeto de pesquisa.</div></div>
+  `;
+}
+function applySelectedModel(){
+  const key = v('modelArea') || 'tecnologia';
+  const d = modelBank[key] || modelBank.geral;
+  outline = d.outline.map((x,i)=>[(i+1)+'. '+x[0],x[1]]);
+  renderOutline();
+  if(!v('tema')) $('tema').value = d.topics[0];
+  saveAll(true);
+  go('project');
+}
+function copyModel(){
+  const key = v('modelArea') || 'tecnologia';
+  const d = modelBank[key] || modelBank.geral;
+  const txt = d.title+'\n\nTEMAS:\n- '+d.topics.join('\n- ')+'\n\nESTRUTURA:\n'+d.outline.map((x,i)=>(i+1)+'. '+x[0]+' — '+x[1]).join('\n');
+  navigator.clipboard?.writeText(txt).then(()=>alert('Modelo copiado.')).catch(()=>alert(txt));
+}
+
+const commercialPlans = {
+  student:{name:'Estudante individual',unit:79,period:'ano',range:'R$ 49 a R$ 99/ano',pitch:'Entrada acessível para uso acadêmico individual.'},
+  pro:{name:'Plano Pro',unit:39.90,period:'mês',range:'R$ 39,90 a R$ 69,90/mês',pitch:'Inclui Tutor, carreira, modelos e recursos avançados.'},
+  teacher:{name:'Professor / orientador',unit:399,period:'ano',range:'R$ 249 a R$ 599/ano',pitch:'Uso profissional para orientação e acompanhamento.'},
+  institution:{name:'Instituição de ensino',unit:8000,period:'ano',range:'R$ 8.000 a R$ 25.000/ano',pitch:'Implantação institucional, suporte e customização.'},
+  perpetual:{name:'Licença standalone perpétua',unit:249,period:'licença',range:'R$ 149 a R$ 299',pitch:'Pagamento único para a versão standalone.'},
+  source:{name:'Licença de código-fonte',unit:9000,period:'projeto',range:'R$ 6.000 a R$ 15.000+',pitch:'Código-fonte com direito de uso conforme contrato específico.'}
+};
+function renderCommercial(){
+  const key = v('licenseModel') || 'student';
+  const p = commercialPlans[key];
+  const qty = Math.max(1, parseInt(v('licenseQty')||'1',10));
+  let est;
+  if(key==='pro') est = (p.unit*qty).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'/mês';
+  else est = (p.unit*qty).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  $('commercialOut').innerHTML = `
+    <div class="item"><b>${esc(p.name)}</b><div class="muted">${esc(p.pitch)}</div></div>
+    <div class="item"><b>Faixa sugerida</b><div style="font-size:24px;font-weight:900;color:#0f2747">${esc(p.range)}</div></div>
+    <div class="item"><b>Cenário ilustrativo</b><div class="muted">${qty} licença(s): <b>${est}</b>. Este valor é apenas uma simulação comercial.</div></div>
+    <div class="item"><b>Para valorizar a oferta</b><ul>
+      <li>documentação e onboarding;</li>
+      <li>controle de acesso e atualizações;</li>
+      <li>suporte com prazos definidos;</li>
+      <li>customização institucional / white-label;</li>
+      <li>painel administrativo e métricas;</li>
+      <li>termos de licença específicos.</li>
+    </ul></div>
+  `;
+}
+function copyCommercial(){
+  const txt = $('commercialOut').innerText.trim();
+  if(!txt){ renderCommercial(); }
+  const out = $('commercialOut').innerText.trim();
+  navigator.clipboard?.writeText(out).then(()=>alert('Proposta copiada.')).catch(()=>alert(out));
+}
+function buildSearchQueries(){
+  const kw = v('jobKeyword') || v('careerCourse') || v('curso') || 'sua formação';
+  const loc = v('jobLocation') || v('careerLocation') || 'sua cidade';
+  const kind = v('jobKind') || 'Emprego';
+  const qs = [
+    `"${kw}" ${kind.toLowerCase()} "${loc}"`,
+    `"${kw}" vagas "${loc}"`,
+    `"${kw}" carreira "${loc}"`,
+    `"${kw}" processo seletivo "${loc}"`,
+    kind==='Concurso' ? `"${kw}" concurso edital "${loc}"` : `"${kw}" ${kind.toLowerCase()} site:linkedin.com/jobs`
+  ];
+  $('queryOut').innerHTML = qs.map(q=>'<div class="item"><b>'+esc(q)+'</b><div class="toolbar"><button class="btn ghost" onclick="navigator.clipboard?.writeText('+JSON.stringify(q)+')">Copiar busca</button></div></div>').join('');
+}
+
+const careerData = {
+  gestao:{
+    roles:['gestão administrativa','recursos humanos','processos e qualidade','compras e suprimentos','controladoria e apoio gerencial','empreendedorismo e consultoria'],
+    learn:['SEBRAE','FGV Educação Executiva / cursos livres','SciELO para leitura de artigos em gestão','Google Ateliê Digital (temas de produtividade e marketing)','Coursera / edX para gestão, dados e liderança'],
+    postgrad:['especializações em gestão pública, RH, finanças, processos, controladoria','mestrados profissionais em administração e gestão pública','programas stricto sensu em administração, políticas públicas e áreas correlatas'],
+    jobs:['páginas de carreiras de empresas, organizações do terceiro setor e instituições de ensino','portais gerais de vagas: LinkedIn, Indeed, Glassdoor, Vagas.com','concursos e seleções públicas para áreas administrativas','redes locais de comércio, indústria e serviços da sua cidade']
+  },
+  educacao:{
+    roles:['docência','coordenação pedagógica','gestão escolar','tecnologia educacional','produção de material didático','projetos sociais e educacionais'],
+    learn:['Portal CAPES','SciELO','MEC e repositórios institucionais de universidades','Nova Escola e materiais de prática pedagógica','cursos livres em metodologias ativas, inclusão e avaliação'],
+    postgrad:['especializações em alfabetização, psicopedagogia, gestão escolar, educação inclusiva','mestrados em educação, ensino e áreas específicas','doutorados em educação, currículo, políticas públicas e ensino'],
+    jobs:['secretarias de educação, escolas públicas e privadas, ONGs e projetos educacionais','portais de vagas gerais e páginas de escolas/universidades','concursos para magistério e gestão educacional','programas de residência pedagógica e processos seletivos temporários']
+  },
+  direito:{
+    roles:['advocacia','assessoria jurídica','compliance','mediação e conciliação','carreiras públicas','consultoria regulatória'],
+    learn:['Portais de tribunais e conselhos','Escolas de governo e escolas da magistratura','SciELO e repositórios jurídicos','cursos livres em LGPD, compliance, processo e métodos consensuais'],
+    postgrad:['especializações em direito público, civil, processo, trabalho, penal, tributário e digital','mestrados e doutorados em direito e políticas públicas','linhas de pesquisa em acesso à justiça, constitucional e regulação'],
+    jobs:['sites de escritórios, departamentos jurídicos e compliance','concursos e seleções para carreiras públicas','portais gerais de vagas com filtro jurídico','ordens, associações e redes profissionais da área']
+  },
+  saude:{
+    roles:['assistência direta','gestão em saúde','saúde coletiva','pesquisa clínica ou aplicada','educação em saúde','apoio matricial e programas específicos'],
+    learn:['Biblioteca Virtual em Saúde (BVS)','Portal CAPES','SciELO','Ministério da Saúde e secretarias','cursos livres em protocolos, gestão, segurança do paciente e saúde digital'],
+    postgrad:['residências, especializações clínicas e em gestão','mestrados profissionais em saúde, ensino na saúde e gestão','doutorados em saúde coletiva, ciências da saúde e áreas correlatas'],
+    jobs:['hospitais, clínicas, redes públicas, OSS/OS e instituições de ensino','portais gerais de vagas e páginas de carreiras de hospitais','residências, concursos públicos e processos seletivos específicos','conselhos profissionais e redes de recrutamento da área']
+  },
+  tecnologia:{
+    roles:['desenvolvimento de software','suporte e infraestrutura','análise de sistemas','dados e BI','segurança da informação','produto e experiência do usuário'],
+    learn:['MDN Web Docs','Microsoft Learn','Google Cloud Skills / AWS Skill Builder','Khan Academy e freeCodeCamp em bases úteis','SciELO e CAPES para pesquisas aplicadas à tecnologia'],
+    postgrad:['especializações em engenharia de software, dados, IA, segurança e UX','mestrados profissionais em computação, engenharia e inovação','doutorados em computação, sistemas de informação e áreas afins'],
+    jobs:['portais de tecnologia, comunidades e redes profissionais','páginas de carreiras de empresas e startups','concursos para TI e processos seletivos de contratos/terceirizadas','plataformas gerais de vagas com filtro para tecnologia']
+  },
+  geral:{
+    roles:['setor público','setor privado','organizações sociais','pesquisa e docência','empreendedorismo'],
+    learn:['Portal CAPES','SciELO','repositórios institucionais','cursos livres de universidades e escolas de governo','plataformas abertas de aprendizagem'],
+    postgrad:['especializações lato sensu na área de formação','mestrados profissionais ou acadêmicos relacionados ao curso','doutorados e linhas de pesquisa alinhadas ao tema de interesse'],
+    jobs:['portais gerais de vagas, páginas de carreiras e concursos','instituições diretamente relacionadas à sua formação','redes profissionais e grupos locais de oportunidade','sites oficiais de processos seletivos e estágios']
+  }
+};
+function careerGuide(){
+  const course = v('careerCourse') || v('curso');
+  const location = v('careerLocation');
+  const interest = v('careerInterest');
+  const goal = v('careerGoal');
+  const area = detectArea(course);
+  const d = careerData[area];
+  const roles = d.roles.map(x => '<li>'+esc(x)+'</li>').join('');
+  const learn = d.learn.map(x => '<li>'+esc(x)+'</li>').join('');
+  const postgrad = d.postgrad.map(x => '<li>'+esc(x)+'</li>').join('');
+  let jobs = d.jobs.map(x => '<li>'+esc(x)+(location ? ' — pesquise em '+esc(location) : '')+'</li>').join('');
+  if(interest){
+    jobs += '<li>Filtre as buscas por interesse declarado: <b>'+esc(interest)+'</b>.</li>';
+  }
+  $('careerOut1').innerHTML =
+    '<div class="item"><b>Aplicações profissionais sugeridas</b><div class="muted">Com base na formação informada, estas são trilhas de atuação que podem ser exploradas:</div><ul>'+roles+'</ul><div class="pillRow"><span class="pill">Objetivo: '+esc(goal)+'</span>'+(course?'<span class="pill">Formação: '+esc(course)+'</span>':'')+'</div></div>';
+  $('careerOut2').innerHTML =
+    '<div class="item"><b>Continuidade da aprendizagem</b><div class="muted">Páginas e tipos de ambientes interessantes para continuar aprendendo após a faculdade:</div><ul>'+learn+'</ul><div class="alert info">Sugestão prática: mantenha um plano contínuo com leitura, curso livre, atualização técnica e networking profissional.</div></div>';
+  $('careerOut3').innerHTML =
+    '<div class="item"><b>Mestrado / doutorado e especialização</b><div class="muted">Possibilidades a considerar, dependendo da sua área e interesses:</div><ul>'+postgrad+'</ul><div class="alert warn">Confirme editais, requisitos, linhas de pesquisa e disponibilidade nas páginas oficiais dos programas.</div></div>';
+  $('careerOut4').innerHTML =
+    '<div class="item"><b>Onde buscar emprego conforme a formação</b><div class="muted">Sugestões de locais e canais para procurar oportunidades:</div><ul>'+jobs+'</ul><div class="alert ok">Dica: monte palavras-chave de busca com formação + área de interesse + cidade/estado para refinar os resultados.</div></div>';
+}
+function copyCareerGuide(){
+  const tabs = ['careerOut1','careerOut2','careerOut3','careerOut4'];
+  const textOut = tabs.map(id => ($(id).innerText || '').trim()).filter(Boolean).join('\n\n');
+  if(!textOut){ alert('Gere as orientações primeiro.'); return; }
+  navigator.clipboard?.writeText(textOut).then(()=>alert('Orientações copiadas.')).catch(()=>alert(textOut));
+}
+function switchTab(btn,id){
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['careerOut1','careerOut2','careerOut3','careerOut4'].forEach(x => $(x).classList.add('hidden'));
+  $(id).classList.remove('hidden');
+}
+
+function runQuality(){
+  let issues=[], oks=[], t=text(), w=wordCount(t);
+  const must = [
+    [v('tema'),'Tema definido.','Defina o tema.'],
+    [v('problema').length>=20,'Problema de pesquisa informado.','Complete o problema de pesquisa.'],
+    [v('objetivoG').length>=20,'Objetivo geral informado.','Complete o objetivo geral.'],
+    [v('metodo'),'Procedimento metodológico informado.','Informe o procedimento metodológico.'],
+    [refs.length>0,'Há fontes cadastradas.','Cadastre as fontes efetivamente utilizadas.'],
+    [w>=250,'Há conteúdo suficiente para iniciar revisão estrutural.','O editor ainda possui pouco conteúdo para análise mais robusta.']
+  ];
+  must.forEach(x => (x[0]?oks:issues).push(x[x[0]?1:2]));
+  let flags=(t.match(/\[VALIDAR[^\]]*\]/gi)||[]).length;
+  if(flags) issues.push('Há '+flags+' marcação(ões) de validação pendente.');
+  let rp=repeatPairs();
+  if(rp.length) issues.push('Foram detectados '+rp.length+' par(es) de parágrafos potencialmente repetitivos.');
+  let absolutes=(t.match(/\b(sempre|nunca|todos|nenhum|comprova|garante|100%)\b/gi)||[]).length;
+  if(absolutes) issues.push('Há '+absolutes+' termo(s) absoluto(s) que merecem revisão contextual.');
+  if(/\b(segundo|conforme|de acordo com)\b/i.test(t)&&!refs.length) issues.push('Há linguagem de atribuição no texto sem referências cadastradas.');
+  $('qa').innerHTML =
+    oks.map(x => '<div class="alert ok">✓ '+esc(x)+'</div>').join('')+
+    issues.map(x => '<div class="alert warn">⚠ '+esc(x)+'</div>').join('')+
+    '<div class="alert '+(issues.length?'warn':'ok')+'"><b>Resultado:</b> '+(issues.length ? issues.length+' ponto(s) exigem revisão humana.' : 'nenhuma pendência estrutural básica detectada.')+'</div>';
+  refreshHome();
+}
+
+function addTask(){
+  let name=v('taskName'), date=v('taskDate'), status=v('taskStatus');
+  if(!name){ alert('Informe a etapa.'); return; }
+  tasks.push({name,date,status});
+  $('taskName').value=''; $('taskDate').value='';
+  renderTasks(); saveAll();
+}
+function renderTasks(){
+  $('tasks').innerHTML = tasks.length
+    ? tasks.map((t,i)=>'<div class="item"><b>'+esc(t.name)+'</b><div class="small">'+esc(t.date||'sem prazo')+' • '+esc(t.status)+'</div><div class="toolbar"><button class="btn danger" onclick="tasks.splice('+i+',1);renderTasks();saveAll()">Remover</button></div></div>').join('')
+    : '<div class="muted">Nenhuma etapa cadastrada.</div>';
+}
+
+function createSnapshot(){
+  const snap = {when:new Date().toISOString(), editor:$('editor').innerHTML, refs:JSON.parse(JSON.stringify(refs)), project:Object.fromEntries(IDs.map(id=>[id,$(id)?.value||'']))};
+  snapshots.unshift(snap); snapshots = snapshots.slice(0,10);
+  saveAll(); renderSnapshots(); alert('Ponto de restauração criado.');
+}
+function renderSnapshots(){
+  $('snapshots').innerHTML = snapshots.length
+    ? snapshots.map((s,i)=>'<div class="item"><b>'+new Date(s.when).toLocaleString('pt-BR')+'</b><div class="toolbar"><button class="btn ghost" onclick="restoreSnap('+i+')">Restaurar</button><button class="btn danger" onclick="snapshots.splice('+i+',1);saveAll();renderSnapshots()">Excluir</button></div></div>').join('')
+    : '<div class="muted">Nenhum ponto de restauração.</div>';
+}
+function restoreSnap(i){
+  if(!confirm('Restaurar este ponto? O estado atual será substituído.')) return;
+  let s=snapshots[i];
+  $('editor').innerHTML=s.editor||''; refs=s.refs||[];
+  Object.entries(s.project||{}).forEach(([id,val])=>{ if($(id)) $(id).value=val; });
+  renderRefs(); saveAll(); stats(); alert('Ponto restaurado.');
+}
+
+function download(name,content,type){
+  let b=new Blob([content],{type}), a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+function exportBackup(){ download('TCC_Studio_4_backup.json', JSON.stringify(dataObject(),null,2), 'application/json'); }
+function importBackup(e){
+  let f=e.target.files[0]; if(!f) return;
+  let r=new FileReader();
+  r.onload=()=>{ try{ let d=JSON.parse(r.result); applyData(d); saveAll(); alert('Backup importado com sucesso.'); }catch(err){ alert('Arquivo de backup inválido.'); } };
+  r.readAsText(f); e.target.value='';
+}
+function documentHtml(){
+  const rs = refs.length ? '<h2>Referências</h2><ol>'+refs.map(r=>'<li>'+esc(formatRef(r))+'</li>').join('')+'</ol>' : '';
+  return '<h1>'+esc(v('tema')||'Trabalho acadêmico')+'</h1><p><b>'+esc(v('tipo')||'Trabalho')+'</b>'+(v('curso')?' — '+esc(v('curso')):'')+(v('instituicao')?'<br>'+esc(v('instituicao')):'')+'</p>'+$('editor').innerHTML+rs;
+}
+function exportHtml(){
+  download('trabalho_academico_v4.html',
+    '<!doctype html><meta charset="utf-8"><title>'+esc(v('tema')||'Trabalho')+'</title><style>body{font-family:Arial;max-width:900px;margin:40px auto;line-height:1.6;padding:0 24px}p{text-align:justify}h1,h2{font-family:Georgia;color:#0f2747}</style>'+documentHtml(),
+    'text/html;charset=utf-8'
+  );
+}
+function exportDoc(){ download('trabalho_academico_v4.doc','<html><head><meta charset="utf-8"></head><body>'+documentHtml()+'
+<!-- Lima Virtual: camada de demonstração gratuita -->
+<style id="lv-demo-style">
+#lvDemoRibbon{position:sticky;top:0;z-index:2147483000;background:linear-gradient(90deg,#0b1020,#24476b);color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font:700 13px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px #0002}
+#lvDemoRibbon strong{color:#57e6c2}#lvDemoRibbon span{opacity:.94}.lv-demo-locked{opacity:.48!important;filter:grayscale(.55)}
+#lvDemoNotice{position:fixed;z-index:2147483647;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1020;color:#fff;border:1px solid #57e6c2;border-radius:12px;padding:12px 16px;max-width:min(92vw,520px);box-shadow:0 10px 30px #0005;font:600 13px/1.45 system-ui,sans-serif;display:none}
+</style>
+<script id="lv-demo-mode">
+(()=>{
+ const APP="TCC e Monografia Studio";
+ const BLOCK=["administração", "painel institucional", "painel do professor", "responsáveis", "licenciamento", "exportar", "exportação", "backup", "restaurar", "importar", "ranking", "comunidade", "relatórios", "relatorio", "auditoria", "qa /", "qa automatizado", "banco & backup", "gestão avançada", "configurações avançadas", "configuração avançada"];
+ let timer;
+ const norm=s=>(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+ const blocked=el=>{const t=norm(el.innerText||el.textContent||el.getAttribute('aria-label')||'');return BLOCK.some(w=>t.includes(norm(w)));};
+ function notice(){let n=document.getElementById('lvDemoNotice');if(!n){n=document.createElement('div');n.id='lvDemoNotice';document.body.appendChild(n)}n.textContent='Recurso reservado à versão licenciada. Você está usando a demonstração gratuita de '+APP+'.';n.style.display='block';clearTimeout(timer);timer=setTimeout(()=>n.style.display='none',3200);}
+ function init(){
+  if(!document.getElementById('lvDemoRibbon')){const b=document.createElement('div');b.id='lvDemoRibbon';b.innerHTML='<strong>DEMONSTRAÇÃO GRATUITA</strong><span>'+APP+' · acesso a recursos selecionados</span><span>Versão completa disponível com licença individual.</span>';document.body.insertBefore(b,document.body.firstChild);}
+  document.querySelectorAll('button,a,[role=button],[role=tab]').forEach(el=>{if(blocked(el)){el.classList.add('lv-demo-locked');el.dataset.lvDemoBlocked='1';el.setAttribute('aria-disabled','true');}});
+ }
+ document.addEventListener('click',e=>{const el=e.target.closest('button,a,[role=button],[role=tab]');if(el&&(el.dataset.lvDemoBlocked==='1'||blocked(el))){e.preventDefault();e.stopImmediatePropagation();notice();}},true);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
+ window.LIMA_VIRTUAL_DEMO={active:true,app:APP,mode:'limited'};
+})();
+</script>
+
+</body></html>','application/msword'); }
+function exportTxt(){ download('trabalho_academico_v4.txt',(v('tema')||'TRABALHO ACADÊMICO')+'\n\n'+text()+'\n\nREFERÊNCIAS\n'+refs.map(formatRef).join('\n'),'text/plain;charset=utf-8'); }
+function renderFinal(){
+  let items = [
+    ['Projeto preenchido',!!v('tema')&&!!v('problema')],
+    ['Objetivos definidos',!!v('objetivoG')&&!!v('objetivosE')],
+    ['Metodologia indicada',!!v('metodo')],
+    ['Estrutura criada',outline.length>0],
+    ['Texto redigido',wordCount()>100],
+    ['Fontes cadastradas',refs.length>0],
+    ['Sem marcadores de validação',!(text().match(/\[VALIDAR/gi)||[]).length],
+    ['Backup recomendado antes da entrega',snapshots.length>0]
+  ];
+  $('finalCheck').innerHTML = items.map(x => '<div class="item">'+(x[1]?'✓':'○')+' '+esc(x[0])+'</div>').join('');
+}
+
+function showLegal(kind){
+  const content = kind === 'terms' ? termsHtml() : privacyHtml();
+  $('legalContent').innerHTML = content;
+  $('legal').showModal();
+}
+function termsHtml(){
+  return `
+    <h3>Termos de uso</h3>
+    <p class="muted"><b>TCC & Monografia Studio 4.0</b> — Assistente Acadêmico e de Desenvolvimento Profissional.</p>
+    <div class="alert info">Copyright: <b>Nailson Rodrigues de Lima</b>.</div>
+    <h4>1. Finalidade</h4>
+    <p class="muted">Esta aplicação oferece apoio à organização, redação assistida, revisão estrutural, planejamento acadêmico, orientação profissional e continuidade da aprendizagem. Ela não substitui orientação humana, revisão técnica, banca, instituição de ensino ou validação metodológica.</p>
+    <h4>2. Integridade acadêmica</h4>
+    <p class="muted">O usuário é responsável pelo conteúdo final produzido, pela veracidade das informações, pela autoria legítima e pelo uso ético do sistema. A aplicação não deve ser usada para plágio, fraude acadêmica, falsificação de dados, fabricação de referências ou apresentação indevida de conteúdo como trabalho pessoal quando isso não corresponder à realidade.</p>
+    <h4>3. Fontes e evidências</h4>
+    <p class="muted">O sistema não garante exatidão de fatos, resultados, referências, programas de pós-graduação ou oportunidades profissionais sem validação externa. O usuário deve confirmar manualmente informações relevantes antes de qualquer submissão ou decisão crítica.</p>
+    <h4>4. Módulo de carreira e pós-graduação</h4>
+    <p class="muted">As sugestões de carreira, aprendizagem, mestrado, doutorado e locais para buscar emprego são orientativas. Não constituem promessa de contratação, aprovação, ingresso ou resultado profissional.</p>
+    <h4>5. Licença de uso</h4>
+    <p class="muted">Salvo ajuste contratual específico, a presente versão é destinada ao uso do titular autorizado. Planos comerciais, licença perpétua, licença institucional e licença de código-fonte podem possuir condições próprias definidas em contrato. A reprodução, redistribuição ou comercialização indevida do código, da marca ou dos materiais sem autorização do titular dos direitos poderá ser restringida por instrumento jurídico próprio.</p>
+    <h4>6. Limitação de responsabilidade</h4>
+    <p class="muted">O uso da aplicação ocorre por conta e risco do usuário. O titular não responde por perdas decorrentes de uso inadequado, interpretação incorreta, falhas de validação humana, incompatibilidades de ambiente, indisponibilidade local do navegador ou decisões tomadas exclusivamente com base nas sugestões exibidas.</p>
+    <h4>7. Atualizações</h4>
+    <p class="muted">Os recursos podem ser revisados, ajustados ou ampliados em versões futuras.</p>
+    <div class="toolbar"><button class="btn primary" onclick="$('legal').close()">Fechar</button></div>
+  `;
+}
+function privacyHtml(){
+  return `
+    <h3>Política de privacidade</h3>
+    <p class="muted">Esta versão foi projetada para funcionar de forma local no navegador do usuário.</p>
+    <div class="alert ok">Por padrão, os dados permanecem no dispositivo do usuário, por meio do armazenamento local do navegador (localStorage).</div>
+    <h4>1. Quais dados podem ser armazenados localmente</h4>
+    <p class="muted">Informações do projeto acadêmico, textos do editor, referências cadastradas, cronograma, módulo de carreira, backups locais e pontos de restauração.</p>
+    <h4>2. Compartilhamento</h4>
+    <p class="muted">Esta versão não envia conteúdo automaticamente a servidores externos. Qualquer compartilhamento depende de ação do próprio usuário, como exportar arquivos, imprimir, copiar conteúdo ou transferir backups.</p>
+    <h4>3. Controle do usuário</h4>
+    <p class="muted">O usuário pode apagar os dados limpando o armazenamento do navegador, excluindo os backups exportados e removendo arquivos gerados.</p>
+    <h4>4. Segurança</h4>
+    <p class="muted">Embora a aplicação seja local, recomenda-se proteger o dispositivo, utilizar senhas adequadas e evitar compartilhamento não autorizado de arquivos com dados acadêmicos e profissionais.</p>
+    <h4>5. Conteúdos sensíveis</h4>
+    <p class="muted">Não é recomendável inserir dados pessoais sensíveis, dados sigilosos, segredos institucionais ou informações que não possam ser tratadas no dispositivo local sem proteção adicional.</p>
+    <h4>6. Titularidade</h4>
+    <p class="muted">Copyright: <b>Nailson Rodrigues de Lima</b>.</p>
+    <div class="toolbar"><button class="btn primary" onclick="$('legal').close()">Fechar</button></div>
+  `;
+}
+
+function updateTutor(){
+  const tips = [];
+  if(!v('tema')) tips.push('Defina um tema específico e delimitado antes de avançar.');
+  if(v('tema') && !v('problema')) tips.push('Converta o tema em uma pergunta central de pesquisa.');
+  if(!v('objetivoG')) tips.push('Escreva um objetivo geral que responda ao problema.');
+  if(!outline.length) tips.push('Gere a estrutura do trabalho para organizar a produção.');
+  if(!refs.length) tips.push('Cadastre fontes reais para sustentar os argumentos do texto.');
+  if(wordCount()<150) tips.push('O texto ainda está curto. Comece pelos subtópicos principais.');
+  if(v('curso') || v('careerCourse')){
+    const area = detectArea(v('careerCourse')||v('curso'));
+    const d = careerData[area];
+    tips.push('Aplicações profissionais possíveis: '+d.roles.slice(0,3).join(', ')+'.');
+    tips.push('Depois da graduação, vale explorar: '+d.learn.slice(0,3).join(', ')+'.');
+    tips.push('Para pós-graduação, avalie: '+d.postgrad[0]+'.');
+  } else {
+    tips.push('Informe sua formação no módulo Carreira & Pós para receber sugestões mais aderentes.');
+  }
+  tips.push('Para buscar emprego, combine formação + área de interesse + cidade/estado em suas pesquisas.');
+  if(v('curso')) tips.push('Consulte o Banco de Modelos por Área para adaptar estrutura, temas e capítulos ao seu curso.');
+  $('tutorBody').innerHTML = `
+    <div class="item"><b>Dicas importantes</b><ul>${tips.slice(0,4).map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>
+    <div class="item"><b>Aplicação da profissão</b><div class="muted">${esc((v('careerCourse')||v('curso')) ? 'Use o módulo Carreira & Pós para explorar áreas de atuação, especializações e caminhos de empregabilidade.' : 'Preencha sua formação para personalizar esta parte.')}</div></div>
+    <div class="item"><b>Aprender depois da faculdade</b><div class="muted">Mantenha um ciclo contínuo de leitura, prática, atualização técnica, networking e busca por cursos livres ou programas formais.</div></div>
+    <div class="item"><b>Atalho rápido</b><div class="toolbar"><button class="btn ghost" onclick="go('career');toggleTutor()">Abrir Carreira & Pós</button><button class="btn ghost" onclick="go('quality');toggleTutor()">Ver Qualidade</button></div></div>
+  `;
+}
+
+window.addEventListener('beforeunload', saveAll);
+load();
+careerGuide();
+renderModels();
+renderCommercial();
+</script>
+</body>
+</html>
