@@ -60,10 +60,10 @@ async function loadLicense(){
   resetPremium();
   licenseInfo='Consultando o status da licença no servidor…';
   try{
-    const {data:lic,error}=await authClient.from('acmf_app_licenses').select('plan_code,status,paid_at,starts_at,expires_at').eq('user_id',who).maybeSingle();
+    const {data:lic,error}=await authClient.from('plv_app_licenses').select('plan_code,status,starts_at,expires_at').eq('user_id',who).eq('app_id','b89044e1-1c13-4faf-a5ad-1847339b7e14').maybeSingle();
     if(error)throw error;
     if(authUser?.id!==who)return;
-    if(!lic||lic.status!=='active'||!lic.paid_at||new Date(lic.starts_at).getTime()>Date.now()||new Date(lic.expires_at).getTime()<=Date.now()){
+    if(!lic||lic.status!=='active'||(lic.starts_at&&new Date(lic.starts_at).getTime()>Date.now())||!lic.expires_at||new Date(lic.expires_at).getTime()<=Date.now()){
       licenseInfo=lic?.expires_at&&new Date(lic.expires_at).getTime()<=Date.now()?'Licença vencida. Escolha um plano para continuar.':'Conta Google autenticada, sem licença paga ativa.';render();return;
     }
     const {data:catalog,error:catError}=await authClient.from('acmf_premium_curriculum').select('payload').eq('id','main').single();
