@@ -347,7 +347,7 @@ footer{font-size:.62rem;padding-top:16px}
 (()=>{
 "use strict";
 const PLV_VERSION="4.0";const SUPABASE_URL="https://piagfpnjiwpngbikkkfp.supabase.co",API_KEY="sb_publishable_G7GV4Yox1KkbjZtjnYxFAQ_kzo9V05a",BUCKET="painel-lima-apps",ICON_BUCKET="painel-lima-icons",ICON_FUNCTION="plv-icon-detector",K={session:"plv2_session",theme:"plv2_theme",iconAuto:"plv2_icon_auto_v231"};
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];let session=load(K.session,null),isAdmin=false,apps=[],filter="Todos",currentViewerUrl="",currentViewerBlob="",health=new Map(),currentLicense=null,currentPlans=[];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];let session=load(K.session,null),isAdmin=false,apps=[],filter="Todos",currentViewerUrl="",currentViewerBlob="",health=new Map(),currentLicense=null,currentLicenses=[],currentPlans=[];
 const builtin=[];
 function load(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}function save(k,v){if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}function friendlyFetchError(err,scope="conexão"){const msg=String(err?.message||err||"");if(/Failed to fetch|Load failed|NetworkError|fetch/i.test(msg))return `Falha de conexão com ${scope}. Verifique a internet, aguarde alguns segundos e tente novamente.`;if(/AbortError|tempo esgotado|timeout/i.test(msg))return `Tempo esgotado ao acessar ${scope}. Tente novamente.`;return msg||`Falha ao acessar ${scope}.`}function slugify(s){return String(s||"app").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70)||"app"}function authHeaders(extra={}){return {apikey:API_KEY,Authorization:"Bearer "+session.access_token,...extra}}
 function toast(msg){const n=document.createElement("div");n.textContent=msg;Object.assign(n.style,{position:"fixed",left:"50%",bottom:"95px",transform:"translateX(-50%)",zIndex:200,background:"var(--strong)",color:"var(--page)",padding:"9px 13px",borderRadius:"999px",fontSize:".75rem",boxShadow:"var(--shadow)"});document.body.appendChild(n);setTimeout(()=>n.remove(),2200)}function openModal(title,body){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modalBack").classList.add("open")}function closeModal(){$("#modalBack").classList.remove("open")}function themeApply(t){document.documentElement.dataset.theme=t==="light"?"light":"dark";save(K.theme,t);$("#themeColor").content=t==="light"?"#f8fbff":"#07111f"}
@@ -381,7 +381,7 @@ function beginGoogleLogin(){
  location.href=url
 }
 function hasActivePlan(){
- return isAdmin||Boolean(currentLicense&&currentLicense.status==="active"&&new Date(currentLicense.expires_at).getTime()>Date.now())
+ return isAdmin||currentLicenses.some(l=>l.status==="active"&&new Date(l.expires_at).getTime()>Date.now())
 }
 function formatBRL(cents){
  if(!Number.isFinite(Number(cents)))return "—";
@@ -395,27 +395,30 @@ async function loadPlanState(){
  try{
   const [plans,licenses]=await Promise.all([
    rest("plv_plans?select=*&order=sort_order.asc,name.asc"),
-   rest("plv_licenses?select=user_id,plan_code,status,starts_at,expires_at,source,updated_at&limit=1")
+   rest("plv_app_licenses?select=app_id,plan_code,status,starts_at,expires_at,source,updated_at&order=expires_at.desc")
   ]);
   currentPlans=Array.isArray(plans)?plans:[];
-  currentLicense=Array.isArray(licenses)&&licenses.length?licenses[0]:null
+  currentLicenses=Array.isArray(licenses)?licenses:[];
+  currentLicense=currentLicenses.find(l=>l.status==="active"&&new Date(l.expires_at).getTime()>Date.now())||currentLicenses[0]||null
  }catch{
-  currentPlans=[];currentLicense=null
+  currentPlans=[];currentLicenses=[];currentLicense=null
  }
 }
-async function startCheckout(planCode){
+async function startCheckout(planCode,appId){
  let popup=null;
  try{
+  if(!appId)throw new Error("Selecione o sistema que deseja licenciar.");
   popup=window.open("about:blank","_blank");
   const access=await token();
   const r=await fetch(SUPABASE_URL+"/functions/v1/plv-checkout-start",{
    method:"POST",
    headers:{apikey:API_KEY,Authorization:"Bearer "+access,"Content-Type":"application/json"},
-   body:JSON.stringify({plan_code:planCode})
+   body:JSON.stringify({plan_code:planCode,app_id:appId})
   });
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(
-   d.error==="plan_not_ready"?"Plano ainda está em configuração. Nenhuma cobrança foi iniciada.":
+   d.error==="plan_not_ready"?"A oferta ainda está em validação. Nenhuma cobrança foi iniciada.":
+   d.error==="app_not_eligible"?"O sistema selecionado não está disponível para licenciamento.":
    d.error==="session_expired"?"Sua sessão expirou. Entre novamente.":
    "Não foi possível iniciar a compra."
   );
@@ -426,13 +429,20 @@ async function startCheckout(planCode){
   toast(String(e.message||e))
  }
 }
-function showPlanModal(){
- const active=hasActivePlan();
- const licenseHtml=currentLicense?`<div class="notice ${active?"ok":"warn"} plan-status"><strong>${active?"Plano ativo":"Plano sem acesso"}</strong><span>${esc(currentLicense.plan_code||"")}</span><span>Validade: ${esc(formatDateBR(currentLicense.expires_at))}</span></div>`:`<div class="notice warn">Nenhum plano ativo nesta conta.</div>`;
- const offers=currentPlans.filter(p=>p.active&&p.checkout_url&&p.amount_cents&&p.duration_days);
- const offersHtml=offers.length?offers.map(p=>`<div class="plan-card"><strong>${esc(p.name)}</strong><span class="plan-price">${esc(formatBRL(p.amount_cents))}</span><span class="plan-meta">${Number(p.duration_days)} dias de acesso</span><span class="plan-meta">${esc(p.description||"")}</span><button class="primary" data-buy-plan="${esc(p.plan_code)}">Contratar</button></div>`).join(""):`<div class="notice">Licença individual por sistema: R$ 29,90 por 30 dias. A contratação será liberada após a validação final do vínculo entre produto Kiwify, sistema selecionado e webhook. Nenhuma cobrança será iniciada antes dessa validação.</div>`;
- openModal("Meu plano",`${licenseHtml}<div class="plan-grid">${offersHtml}</div><div class="formactions"><button class="secondary" id="refreshPlanBtn">↻ Atualizar acesso</button></div>`);
- $$("[data-buy-plan]").forEach(b=>b.onclick=()=>startCheckout(b.dataset.buyPlan));
+async function showPlanModal(){
+ await loadPlanState();
+ const activeLicenses=currentLicenses.filter(l=>l.status==="active"&&new Date(l.expires_at).getTime()>Date.now());
+ const licenseHtml=activeLicenses.length?activeLicenses.map(l=>{
+  const app=apps.find(a=>a.id===l.app_id);
+  return '<div class="notice ok plan-status"><strong>'+esc(app?.name||"Sistema licenciado")+'</strong><span>'+esc(l.plan_code||"Licença individual")+'</span><span>Validade: '+esc(formatDateBR(l.expires_at))+'</span></div>'
+ }).join(""):'<div class="notice warn">Nenhuma licença ativa. A demonstração gratuita continua disponível.</div>';
+ const offers=currentPlans.filter(p=>p.active&&p.checkout_url&&p.amount_cents&&p.duration_days&&p.max_apps===1);
+ const offersHtml=offers.length?offers.map(p=>'<div class="plan-card"><strong>'+esc(p.name)+'</strong><span class="plan-price">'+esc(formatBRL(p.amount_cents))+'</span><span class="plan-meta">'+Number(p.duration_days)+' dias de acesso a 1 sistema</span><span class="plan-meta">'+esc(p.description||"")+'</span><button class="primary" data-buy-plan="'+esc(p.plan_code)+'">Contratar</button></div>').join(""):'<div class="notice">Oferta individual: R$ 29,90 por sistema, com validade de 30 dias. A liberação do checkout depende da validação final da assinatura do webhook Kiwify.</div>';
+ const eligible=await rest("plv_apps?select=id,name&status=eq.published&requires_plan=eq.true&order=sort_order.asc,name.asc");
+ const appOptions=Array.isArray(eligible)?eligible:[];
+ const picker=appOptions.length?'<label class="field-label" for="licenseAppSelect">Sistema que deseja licenciar</label><select id="licenseAppSelect" class="input">'+appOptions.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join("")+'</select>':'<div class="notice warn">Não há sistemas elegíveis para licenciamento no momento.</div>';
+ openModal("Minhas licenças",licenseHtml+'<div class="plan-grid">'+offersHtml+'</div><div class="form" style="margin-top:12px">'+picker+'</div><div class="formactions"><button class="secondary" id="refreshPlanBtn">↻ Atualizar acesso</button></div>');
+ $("[data-buy-plan]").forEach(b=>b.onclick=()=>startCheckout(b.dataset.buyPlan,$("#licenseAppSelect")?.value));
  $("#refreshPlanBtn").onclick=async()=>{await loadPlanState();closeModal();showPlanModal()}
 }
 async function showPlanAdmin(){
