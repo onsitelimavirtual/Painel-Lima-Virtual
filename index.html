@@ -380,8 +380,9 @@ function beginGoogleLogin(){
  const url=SUPABASE_URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirect);
  location.href=url
 }
-function hasActivePlan(){
- return isAdmin||currentLicenses.some(l=>l.status==="active"&&new Date(l.expires_at).getTime()>Date.now())
+function hasActivePlan(appId){
+ const active=l=>l.status==="active"&&new Date(l.expires_at).getTime()>Date.now();
+ return isAdmin||currentLicenses.some(l=>active(l)&&(!appId||l.app_id===appId))
 }
 function formatBRL(cents){
  if(!Number.isFinite(Number(cents)))return "—";
@@ -435,7 +436,7 @@ async function startCheckout(planCode,appId){
   toast(String(e.message||e))
  }
 }
-async function showPlanModal(){
+async function showPlanModal(preselectAppId=""){
  await loadPlanState();
  const activeLicenses=currentLicenses.filter(l=>l.status==="active"&&new Date(l.expires_at).getTime()>Date.now());
  const licenseHtml=activeLicenses.length?activeLicenses.map(l=>{
@@ -446,7 +447,8 @@ async function showPlanModal(){
  const offersHtml=offers.length?offers.map(p=>'<div class="plan-card"><strong>'+esc(p.name)+'</strong><span class="plan-price">'+esc(formatBRL(p.amount_cents))+'</span><span class="plan-meta">'+Number(p.duration_days)+' dias de acesso a 1 sistema</span><span class="plan-meta">'+esc(p.description||"")+'</span><button class="primary" data-buy-plan="'+esc(p.plan_code)+'">Contratar</button></div>').join(""):'<div class="notice">Oferta individual: R$ 29,90 por sistema, com validade de 30 dias. A liberação do checkout depende da validação final da assinatura do webhook Kiwify.</div>';
  const eligible=await rest("plv_apps?select=id,name&status=eq.published&requires_plan=eq.true&order=sort_order.asc,name.asc");
  const appOptions=Array.isArray(eligible)?eligible:[];
- const picker=appOptions.length?'<label class="field-label" for="licenseAppSelect">Sistema que deseja licenciar</label><select id="licenseAppSelect" class="input">'+appOptions.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join("")+'</select>':'<div class="notice warn">Não há sistemas elegíveis para licenciamento no momento.</div>';
+ const selected=appOptions.some(a=>a.id===preselectAppId)?preselectAppId:(appOptions[0]?.id||"");
+  const picker=appOptions.length?'<label class="field-label" for="licenseAppSelect">Sistema que deseja licenciar</label><select id="licenseAppSelect" class="input">'+appOptions.map(a=>'<option value="'+esc(a.id)+'"'+(a.id===selected?" selected":"")+' >'+esc(a.name)+'</option>').join("")+'</select>':'<div class="notice warn">Não há sistemas elegíveis para licenciamento no momento.</div>';
  openModal("Minhas licenças",licenseHtml+'<div class="plan-grid">'+offersHtml+'</div><div class="form" style="margin-top:12px">'+picker+'</div><div class="formactions"><button class="secondary" id="refreshPlanBtn">↻ Atualizar acesso</button></div>');
  $("[data-buy-plan]").forEach(b=>b.onclick=()=>startCheckout(b.dataset.buyPlan,$("#licenseAppSelect")?.value));
  $("#refreshPlanBtn").onclick=async()=>{await loadPlanState();closeModal();showPlanModal()}
@@ -608,7 +610,7 @@ function viewer(title,url,isBlob=false){
 async function openApp(a){
  if(!a)return;
  const demoAvailable=a.id==="d0f53071-550f-4a6e-9cb9-959019339141";
- if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan()&&!demoAvailable){showPlanModal();return}
+ if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan(a.id)&&!demoAvailable){showPlanModal(a.id);return}
  let popup=null;
  try{
   if(a.builtin){
