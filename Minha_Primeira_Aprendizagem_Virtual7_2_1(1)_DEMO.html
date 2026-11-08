@@ -704,33 +704,7 @@ const _oldGrade=setGrade;
 setGrade=function(g){_oldGrade(g);draft=''};
 document.querySelector('#navigation').insertAdjacentHTML('beforeend','<button class="navBtn" data-view="library"><span>📚</span> Biblioteca</button><button class="navBtn" data-view="laboratory"><span>🔬</span> Laboratório</button><button class="navBtn" data-view="workshop"><span>✍️</span> Oficina de palavras</button><button class="navBtn" data-view="legal"><span>📋</span> Contrato</button>');
 document.addEventListener('submit',e=>{if(e.target.id==='agreementForm'){e.preventDefault();acceptAgreement()}});
-document.addEventListener('click',e=>{let b=e.target.closest('button');if(!b||!hasAgreement())return;let d=b.dataset;if(d.libraryOpen){chosenTopic=d.libraryOpen;render();el('featureLesson')?.scrollIntoView({behavior:'smooth',block:'start'})}if(d.libraryClose!==undefined){chosenTopic=null;render()}if(d.libraryPractice){selectModuleRoute(d.libraryPractice)}if(d.librarySpeak){let t=topics.find(x=>x.id===d.librarySpeak);if(t){let a=EXAMPLES[t.type];speakText(`${t.title}. ${t.objective}. Exemplo: ${a.example}. Estratégia: ${a.method}. Cuidado: ${a.care}`)}}if(d.labMode){lab.kind=d.labMode;render()}if(d.workshopSpeak!==undefined)speakText(WORKSHOPS[state.grade].text);if(d.workshopFeedback!==undefined)workshopFeedback();if(d.workshopClear!==undefined){el('writingDraft').value='';document.querySelectorAll('[data-draft-check]').forEach(x=>x.checked=false);el('workshopResult').innerHTML='';updateWorkshopCount()}if(d.contractExport!==undefined){downloadBlob('recibo-aceite-mpav-v61.json',JSON.stringify(localReceipt(),null,2),'application/json')}if(d.contractPrint!==undefined){const w=window.open('','_blank');if(w){w.document.write('<html><head><title>Contrato MPAV</title><meta charset="UTF-8"></head><body style="font:15px/1.6 sans-serif;padding:30px;white-space:pre-wrap">'+esc(CONTRACT_BODY)+(contractRecord?'\n\nACEITE DECLARADO POR: '+esc(contractRecord.adultName)+'\nDATA: '+esc(contractRecord.at)+'\nRECIBO: '+esc(contractRecord.receipt):'')+'
-<!-- Lima Virtual: camada de demonstração gratuita -->
-<style id="lv-demo-style">
-#lvDemoRibbon{position:sticky;top:0;z-index:2147483000;background:linear-gradient(90deg,#0b1020,#24476b);color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font:700 13px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px #0002}
-#lvDemoRibbon strong{color:#57e6c2}#lvDemoRibbon span{opacity:.94}.lv-demo-locked{opacity:.48!important;filter:grayscale(.55)}
-#lvDemoNotice{position:fixed;z-index:2147483647;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1020;color:#fff;border:1px solid #57e6c2;border-radius:12px;padding:12px 16px;max-width:min(92vw,520px);box-shadow:0 10px 30px #0005;font:600 13px/1.45 system-ui,sans-serif;display:none}
-</style>
-<script id="lv-demo-mode">
-(()=>{
- const APP="Minha Primeira Aprendizagem Virtual";
- const BLOCK=["administração", "painel institucional", "painel do professor", "responsáveis", "licenciamento", "exportar", "exportação", "backup", "restaurar", "importar", "ranking", "comunidade", "relatórios", "relatorio", "auditoria", "qa /", "qa automatizado", "banco & backup", "gestão avançada", "configurações avançadas", "configuração avançada"];
- let timer;
- const norm=s=>(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
- const blocked=el=>{const t=norm(el.innerText||el.textContent||el.getAttribute('aria-label')||'');return BLOCK.some(w=>t.includes(norm(w)));};
- function notice(){let n=document.getElementById('lvDemoNotice');if(!n){n=document.createElement('div');n.id='lvDemoNotice';document.body.appendChild(n)}n.textContent='Recurso reservado à versão licenciada. Você está usando a demonstração gratuita de '+APP+'.';n.style.display='block';clearTimeout(timer);timer=setTimeout(()=>n.style.display='none',3200);}
- function init(){
-  if(!document.getElementById('lvDemoRibbon')){const b=document.createElement('div');b.id='lvDemoRibbon';b.innerHTML='<strong>DEMONSTRAÇÃO GRATUITA</strong><span>'+APP+' · acesso a recursos selecionados</span><span>Versão completa disponível com licença individual.</span>';document.body.insertBefore(b,document.body.firstChild);}
-  document.querySelectorAll('button,a,[role=button],[role=tab]').forEach(el=>{if(blocked(el)){el.classList.add('lv-demo-locked');el.dataset.lvDemoBlocked='1';el.setAttribute('aria-disabled','true');}});
- }
- document.addEventListener('click',e=>{const el=e.target.closest('button,a,[role=button],[role=tab]');if(el&&(el.dataset.lvDemoBlocked==='1'||blocked(el))){e.preventDefault();e.stopImmediatePropagation();notice();}},true);
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
- new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
- window.LIMA_VIRTUAL_DEMO={active:true,app:APP,mode:'limited'};
-})();
-</script>
-
-</body></html>');w.document.close();w.print()}else toast('O navegador bloqueou a janela de impressão.')}if(d.contractRevoke!==undefined){if(confirm('Revogar o aceite e APAGAR todo o progresso, jogos, catálogo salvo, modelos curriculares e registros locais deste aplicativo neste navegador?')){for(let k of [CONTRACT_KEY,STORAGE,FUNKEY,CATALOG,PILOTS,PILOT_REVIEW,V6_FUNKEY,'mpav-trilha-auditoria-v61','mpav-adulto-aceite-6','mpav-adulto-aceite-70','mpav-v7-games-v1','mpav-7.2-conquistas-v1'])localStorage.removeItem(k);contractRecord=null;state.progress=defaultProgress();state.view='home';funStats=readFunStats({});state.catalog=[];state.pilots=[];state.pilotDecisions={};state.chat=[{role:'bot',text:'Olá! Escolha um tema para começar.'}];mentor.focusId='';mentor.topicId='';mentor.challenge=null;mentor.term='';mentor.wins=0;mentor.attempts=0;render()}}});
+document.addEventListener('click',e=>{let b=e.target.closest('button');if(!b||!hasAgreement())return;let d=b.dataset;if(d.libraryOpen){chosenTopic=d.libraryOpen;render();el('featureLesson')?.scrollIntoView({behavior:'smooth',block:'start'})}if(d.libraryClose!==undefined){chosenTopic=null;render()}if(d.libraryPractice){selectModuleRoute(d.libraryPractice)}if(d.librarySpeak){let t=topics.find(x=>x.id===d.librarySpeak);if(t){let a=EXAMPLES[t.type];speakText(`${t.title}. ${t.objective}. Exemplo: ${a.example}. Estratégia: ${a.method}. Cuidado: ${a.care}`)}}if(d.labMode){lab.kind=d.labMode;render()}if(d.workshopSpeak!==undefined)speakText(WORKSHOPS[state.grade].text);if(d.workshopFeedback!==undefined)workshopFeedback();if(d.workshopClear!==undefined){el('writingDraft').value='';document.querySelectorAll('[data-draft-check]').forEach(x=>x.checked=false);el('workshopResult').innerHTML='';updateWorkshopCount()}if(d.contractExport!==undefined){downloadBlob('recibo-aceite-mpav-v61.json',JSON.stringify(localReceipt(),null,2),'application/json')}if(d.contractPrint!==undefined){const w=window.open('','_blank');if(w){w.document.write('<html><head><title>Contrato MPAV</title><meta charset="UTF-8"></head><body style="font:15px/1.6 sans-serif;padding:30px;white-space:pre-wrap">'+esc(CONTRACT_BODY)+(contractRecord?'\n\nACEITE DECLARADO POR: '+esc(contractRecord.adultName)+'\nDATA: '+esc(contractRecord.at)+'\nRECIBO: '+esc(contractRecord.receipt):'')+'</body></html>');w.document.close();w.print()}else toast('O navegador bloqueou a janela de impressão.')}if(d.contractRevoke!==undefined){if(confirm('Revogar o aceite e APAGAR todo o progresso, jogos, catálogo salvo, modelos curriculares e registros locais deste aplicativo neste navegador?')){for(let k of [CONTRACT_KEY,STORAGE,FUNKEY,CATALOG,PILOTS,PILOT_REVIEW,V6_FUNKEY,'mpav-trilha-auditoria-v61','mpav-adulto-aceite-6','mpav-adulto-aceite-70','mpav-v7-games-v1','mpav-7.2-conquistas-v1'])localStorage.removeItem(k);contractRecord=null;state.progress=defaultProgress();state.view='home';funStats=readFunStats({});state.catalog=[];state.pilots=[];state.pilotDecisions={};state.chat=[{role:'bot',text:'Olá! Escolha um tema para começar.'}];mentor.focusId='';mentor.topicId='';mentor.challenge=null;mentor.term='';mentor.wins=0;mentor.attempts=0;render()}}});
 document.addEventListener('change',e=>{if(e.target.id==='libraryYear'){libraryFilter=e.target.value;render()}if(['labWhole','labPart','labGroups','labEach'].includes(e.target.id)){} });
 document.addEventListener('input',e=>{if(e.target.id==='librarySearch'){libraryQuery=e.target.value;const inp=e.target;const pos=inp.selectionStart;render();const again=el('librarySearch');again?.focus();again?.setSelectionRange(pos,pos)}if(e.target.id==='writingDraft'){updateWorkshopCount()}if(e.target.id==='labWhole'){lab.whole=+e.target.value;lab.part=Math.min(lab.part,lab.whole);render()}if(e.target.id==='labPart'){lab.part=+e.target.value;render()}if(e.target.id==='labGroups'){lab.groups=+e.target.value;render()}if(e.target.id==='labEach'){lab.each=+e.target.value;render()}});
 window.MPAV_V4_QA={exampleCount:()=>Object.keys(EXAMPLES).length,topicCount:()=>topics.length,agreement:()=>hasAgreement(),version:CONTRACT_VERSION,caseChecks:()=>({allMapped:topics.every(t=>!!EXAMPLES[t.type]),noChildNames:true,localOnly:true}),selectedMode:()=>lab.kind};
@@ -1784,5 +1758,30 @@ render();
 })();
 
 </script>
+<!-- Lima Virtual: camada de demonstração gratuita -->
+<style id="lv-demo-style">
+#lvDemoRibbon{position:sticky;top:0;z-index:2147483000;background:linear-gradient(90deg,#0b1020,#24476b);color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font:700 13px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px #0002}
+#lvDemoRibbon strong{color:#57e6c2}#lvDemoRibbon span{opacity:.94}.lv-demo-locked{opacity:.48!important;filter:grayscale(.55)}
+#lvDemoNotice{position:fixed;z-index:2147483647;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1020;color:#fff;border:1px solid #57e6c2;border-radius:12px;padding:12px 16px;max-width:min(92vw,520px);box-shadow:0 10px 30px #0005;font:600 13px/1.45 system-ui,sans-serif;display:none}
+</style>
+<script id="lv-demo-mode">
+(()=>{
+ const APP="Minha Primeira Aprendizagem Virtual";
+ const BLOCK=["administração", "painel institucional", "painel do professor", "responsáveis", "licenciamento", "exportar", "exportação", "backup", "restaurar", "importar", "ranking", "comunidade", "relatórios", "relatorio", "auditoria", "qa /", "qa automatizado", "banco & backup", "gestão avançada", "configurações avançadas", "configuração avançada"];
+ let timer;
+ const norm=s=>(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+ const blocked=el=>{const t=norm(el.innerText||el.textContent||el.getAttribute('aria-label')||'');return BLOCK.some(w=>t.includes(norm(w)));};
+ function notice(){let n=document.getElementById('lvDemoNotice');if(!n){n=document.createElement('div');n.id='lvDemoNotice';document.body.appendChild(n)}n.textContent='Recurso reservado à versão licenciada. Você está usando a demonstração gratuita de '+APP+'.';n.style.display='block';clearTimeout(timer);timer=setTimeout(()=>n.style.display='none',3200);}
+ function init(){
+  if(!document.getElementById('lvDemoRibbon')){const b=document.createElement('div');b.id='lvDemoRibbon';b.innerHTML='<strong>DEMONSTRAÇÃO GRATUITA</strong><span>'+APP+' · acesso a recursos selecionados</span><span>Versão completa disponível com licença individual.</span>';document.body.insertBefore(b,document.body.firstChild);}
+  document.querySelectorAll('button,a,[role=button],[role=tab]').forEach(el=>{if(blocked(el)){el.classList.add('lv-demo-locked');el.dataset.lvDemoBlocked='1';el.setAttribute('aria-disabled','true');}});
+ }
+ document.addEventListener('click',e=>{const el=e.target.closest('button,a,[role=button],[role=tab]');if(el&&(el.dataset.lvDemoBlocked==='1'||blocked(el))){e.preventDefault();e.stopImmediatePropagation();notice();}},true);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
+ window.LIMA_VIRTUAL_DEMO={active:true,app:APP,mode:'limited'};
+})();
+</script>
+
 </body>
 </html>

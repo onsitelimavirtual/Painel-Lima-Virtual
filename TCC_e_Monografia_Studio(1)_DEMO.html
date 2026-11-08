@@ -1271,33 +1271,7 @@ function exportHtml(){
     'text/html;charset=utf-8'
   );
 }
-function exportDoc(){ download('trabalho_academico_v4.doc','<html><head><meta charset="utf-8"></head><body>'+documentHtml()+'
-<!-- Lima Virtual: camada de demonstração gratuita -->
-<style id="lv-demo-style">
-#lvDemoRibbon{position:sticky;top:0;z-index:2147483000;background:linear-gradient(90deg,#0b1020,#24476b);color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font:700 13px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px #0002}
-#lvDemoRibbon strong{color:#57e6c2}#lvDemoRibbon span{opacity:.94}.lv-demo-locked{opacity:.48!important;filter:grayscale(.55)}
-#lvDemoNotice{position:fixed;z-index:2147483647;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1020;color:#fff;border:1px solid #57e6c2;border-radius:12px;padding:12px 16px;max-width:min(92vw,520px);box-shadow:0 10px 30px #0005;font:600 13px/1.45 system-ui,sans-serif;display:none}
-</style>
-<script id="lv-demo-mode">
-(()=>{
- const APP="TCC e Monografia Studio";
- const BLOCK=["administração", "painel institucional", "painel do professor", "responsáveis", "licenciamento", "exportar", "exportação", "backup", "restaurar", "importar", "ranking", "comunidade", "relatórios", "relatorio", "auditoria", "qa /", "qa automatizado", "banco & backup", "gestão avançada", "configurações avançadas", "configuração avançada"];
- let timer;
- const norm=s=>(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
- const blocked=el=>{const t=norm(el.innerText||el.textContent||el.getAttribute('aria-label')||'');return BLOCK.some(w=>t.includes(norm(w)));};
- function notice(){let n=document.getElementById('lvDemoNotice');if(!n){n=document.createElement('div');n.id='lvDemoNotice';document.body.appendChild(n)}n.textContent='Recurso reservado à versão licenciada. Você está usando a demonstração gratuita de '+APP+'.';n.style.display='block';clearTimeout(timer);timer=setTimeout(()=>n.style.display='none',3200);}
- function init(){
-  if(!document.getElementById('lvDemoRibbon')){const b=document.createElement('div');b.id='lvDemoRibbon';b.innerHTML='<strong>DEMONSTRAÇÃO GRATUITA</strong><span>'+APP+' · acesso a recursos selecionados</span><span>Versão completa disponível com licença individual.</span>';document.body.insertBefore(b,document.body.firstChild);}
-  document.querySelectorAll('button,a,[role=button],[role=tab]').forEach(el=>{if(blocked(el)){el.classList.add('lv-demo-locked');el.dataset.lvDemoBlocked='1';el.setAttribute('aria-disabled','true');}});
- }
- document.addEventListener('click',e=>{const el=e.target.closest('button,a,[role=button],[role=tab]');if(el&&(el.dataset.lvDemoBlocked==='1'||blocked(el))){e.preventDefault();e.stopImmediatePropagation();notice();}},true);
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
- new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
- window.LIMA_VIRTUAL_DEMO={active:true,app:APP,mode:'limited'};
-})();
-</script>
-
-</body></html>','application/msword'); }
+function exportDoc(){ download('trabalho_academico_v4.doc','<html><head><meta charset="utf-8"></head><body>'+documentHtml()+'</body></html>','application/msword'); }
 function exportTxt(){ download('trabalho_academico_v4.txt',(v('tema')||'TRABALHO ACADÊMICO')+'\n\n'+text()+'\n\nREFERÊNCIAS\n'+refs.map(formatRef).join('\n'),'text/plain;charset=utf-8'); }
 function renderFinal(){
   let items = [
@@ -1394,5 +1368,31 @@ careerGuide();
 renderModels();
 renderCommercial();
 </script>
+<!-- Lima Virtual: camada de demonstração gratuita -->
+<style id="lv-demo-style">
+#lvDemoRibbon{position:sticky;top:0;z-index:2147483000;background:linear-gradient(90deg,#0b1020,#24476b);color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font:700 13px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px #0002}
+#lvDemoRibbon strong{color:#57e6c2}#lvDemoRibbon span{opacity:.94}.lv-demo-locked{opacity:.48!important;filter:grayscale(.55)}
+#lvDemoNotice{position:fixed;z-index:2147483647;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1020;color:#fff;border:1px solid #57e6c2;border-radius:12px;padding:12px 16px;max-width:min(92vw,520px);box-shadow:0 10px 30px #0005;font:600 13px/1.45 system-ui,sans-serif;display:none}
+</style>
+<script id="lv-demo-mode">
+(()=>{
+ const APP="TCC e Monografia Studio";
+ const BLOCK=["administração", "painel institucional", "painel do professor", "responsáveis", "licenciamento", "exportar", "exportação", "backup", "restaurar", "importar", "ranking", "comunidade", "relatórios", "relatorio", "auditoria", "qa /", "qa automatizado", "banco & backup", "gestão avançada", "configurações avançadas", "configuração avançada"];
+ let timer;
+ const norm=s=>(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+ const blocked=el=>{const t=norm(el.innerText||el.textContent||el.getAttribute('aria-label')||'');return BLOCK.some(w=>t.includes(norm(w)));};
+ function notice(){let n=document.getElementById('lvDemoNotice');if(!n){n=document.createElement('div');n.id='lvDemoNotice';document.body.appendChild(n)}n.textContent='Recurso reservado à versão licenciada. Você está usando a demonstração gratuita de '+APP+'.';n.style.display='block';clearTimeout(timer);timer=setTimeout(()=>n.style.display='none',3200);}
+ function init(){
+  if(!document.getElementById('lvDemoRibbon')){const b=document.createElement('div');b.id='lvDemoRibbon';b.innerHTML='<strong>DEMONSTRAÇÃO GRATUITA</strong><span>'+APP+' · acesso a recursos selecionados</span><span>Versão completa disponível com licença individual.</span>';document.body.insertBefore(b,document.body.firstChild);}
+  document.querySelectorAll('button,a,[role=button],[role=tab]').forEach(el=>{if(blocked(el)){el.classList.add('lv-demo-locked');el.dataset.lvDemoBlocked='1';el.setAttribute('aria-disabled','true');}});
+ }
+ document.addEventListener('click',e=>{const el=e.target.closest('button,a,[role=button],[role=tab]');if(el&&(el.dataset.lvDemoBlocked==='1'||blocked(el))){e.preventDefault();e.stopImmediatePropagation();notice();}},true);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
+ window.LIMA_VIRTUAL_DEMO={active:true,app:APP,mode:'limited'};
+})();
+</script>
+
+</body></html>
 </body>
 </html>
