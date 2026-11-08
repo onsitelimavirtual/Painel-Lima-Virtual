@@ -887,11 +887,12 @@ async function showValuationPanel(){
  const render=async()=>{
   body.innerHTML='<div class="notice">Consultando pedidos, planos, licenças e catálogo…</div>';
   try{
-   const [orders,plans,licenses,appsRows]=await Promise.all([
+   const [orders,plans,licenses,appsRows,events]=await Promise.all([
     rest("plv_orders?select=status,amount_cents,paid_at&order=paid_at.desc&limit=1000"),
     rest("plv_plans?select=plan_code,amount_cents,duration_days,active"),
     rest("plv_app_licenses?select=user_id,plan_code,status,expires_at&limit=2000"),
-    rest("plv_apps?select=id,status")
+    rest("plv_apps?select=id,status"),
+    rest("plv_kiwify_events?select=processing_status&limit=2000")
    ]);
    const paid=(orders||[]).filter(x=>x.status==="paid"),refunded=(orders||[]).filter(x=>x.status==="refunded");
    const paidCents=paid.reduce((a,x)=>a+Number(x.amount_cents||0),0),refundedCents=refunded.reduce((a,x)=>a+Number(x.amount_cents||0),0);
@@ -900,6 +901,8 @@ async function showValuationPanel(){
    let mrr=0,hasPricing=active.length>0;
    active.forEach(l=>{const p=(plans||[]).find(x=>x.plan_code===l.plan_code);if(p&&Number(p.amount_cents)>0&&Number(p.duration_days)>0)mrr+=Number(p.amount_cents)*30/Number(p.duration_days);else hasPricing=false});
    const arr=mrr*12,appCount=(appsRows||[]).filter(a=>a.status==="published").length;
+   const signatureIssues=(events||[]).filter(e=>e.processing_status==="signature_mismatch").length;
+   const manualReviews=(events||[]).filter(e=>e.processing_status==="manual_review").length;
    const fmt=v=>money(v/100),low=arr,mid=arr*2,high=arr*3;
    body.innerHTML=
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px">'+
@@ -913,7 +916,7 @@ async function showValuationPanel(){
     '<div class="notice"><small>Base · 2×</small><strong style="display:block;color:var(--strong)">'+(hasPricing?fmt(mid):'—')+'</strong></div>'+
     '<div class="notice"><small>Otimista · 3×</small><strong style="display:block;color:var(--strong)">'+(hasPricing?fmt(high):'—')+'</strong></div></div><small style="color:var(--muted)">Múltiplos ilustrativos para simulação inicial. A base de clientes ainda é pequena; não representam preço de venda garantido.</small></section>'+
     '<section style="border:1px solid var(--line);border-radius:14px;padding:12px"><strong style="color:var(--strong)">Custo de reposição do ativo intelectual</strong><div class="formrow" style="margin-top:9px"><label>Horas de desenvolvimento<input id="valDevHours" type="number" min="0" step="1" value="0"></label><label>Valor por hora (R$)<input id="valHourRate" type="number" min="0" step="1" value="100"></label></div><label style="display:block;margin-top:8px">Desconto por risco/obsolescência: <strong id="valRiskLabel">40%</strong><input id="valRisk" type="range" min="0" max="90" step="5" value="40"></label><div class="notice" style="margin-top:8px">Referência calculada: <strong id="valReplacement" style="color:var(--strong)">'+money(0)+'</strong><br><small>Informe horas e taxa com base em registros reais. Este método fica separado do múltiplo de receita.</small></div></section>'+
-    '<div class="notice warn"><strong>Qualidade da evidência: limitada</strong><br>Base observada: '+count(paid.length)+' pedidos pagos, '+count(refunded.length)+' estornos, '+count(active.length)+' licenças ativas e '+count(customers)+' cliente(s) ativo(s). O banco retornou '+count(orders.length)+' pedidos (limite de 1.000). Ainda é necessário conciliar Kiwify, custos, despesas, impostos, horas de desenvolvimento, propriedade intelectual e retenção para um valuation formal.</div>'+
+    '<div class="notice warn"><strong>Qualidade da evidência: limitada</strong><br>Base observada: '+count(paid.length)+' pedidos pagos, '+count(refunded.length)+' estornos, '+count(active.length)+' licenças ativas e '+count(customers)+' cliente(s) ativo(s). Eventos Kiwify consultados: '+count(events.length)+'; divergências de assinatura: '+count(signatureIssues)+'; em revisão manual: '+count(manualReviews)+'. O banco retornou '+count(orders.length)+' pedidos (limite de 1.000). Concilie os eventos com a Kiwify antes de tratar o histórico como receita definitiva. Ainda é necessário incluir custos, despesas, impostos, horas de desenvolvimento, propriedade intelectual e retenção para um valuation formal.</div>'+
     '<small style="color:var(--muted)">Atualizado em '+new Date().toLocaleString("pt-BR")+'. Pedidos fora do limite e eventos não conciliados podem não estar incluídos.</small>';
    const updateReplacement=()=>{const h=Number($("#valDevHours").value||0),r=Number($("#valHourRate").value||0),d=Number($("#valRisk").value||0);$("#valRiskLabel").textContent=d+"%";$("#valReplacement").textContent=money(h*r*(1-d/100))};
    ["valDevHours","valHourRate","valRisk"].forEach(id=>$("#"+id).addEventListener("input",updateReplacement));
