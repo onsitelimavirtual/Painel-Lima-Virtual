@@ -328,6 +328,23 @@ footer{font-size:.62rem;padding-top:16px}
 .passe-mini-icon{background:#fff!important;border:1px solid #dbe4ed!important;overflow:hidden;width:76px!important;height:76px!important}
 .passe-mini-icon img{width:100%!important;height:100%!important;object-fit:contain!important;padding:2px!important;background:#fff}
 @media(max-width:560px){.brandlogo{width:54px!important;height:54px!important}.passe-mini{grid-template-columns:68px minmax(0,1fr)!important;gap:11px;padding:13px!important}.passe-mini-icon{width:68px!important;height:68px!important}.passe-mini-link{grid-column:1/-1;justify-content:center}}
+
+/* V4.0.2 — manter compra visível ao lado/abaixo da demonstração */
+.cardactions [data-buy-app]{
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ visibility:visible!important;
+ opacity:1!important;
+ min-height:40px;
+}
+@media(max-width:650px){
+ .cardactions [data-buy-app]{
+  display:inline-flex!important;
+  width:100%!important;
+  margin-top:7px!important;
+ }
+}
 </style>
 </head>
 <body>
