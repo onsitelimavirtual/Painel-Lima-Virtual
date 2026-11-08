@@ -494,7 +494,7 @@ async function showPlanAdmin(){
  }
 }
 async function checkAdmin(){if(!session?.user?.id){isAdmin=false;return}try{const rows=await rest("plv_admins?select=user_id&user_id=eq."+encodeURIComponent(session.user.id));isAdmin=Array.isArray(rows)&&rows.length>0}catch{isAdmin=false}}
-async function loadApps(){try{const rows=await rest("plv_apps?select=*&order=sort_order.asc,name.asc");apps=[...builtin,...(Array.isArray(rows)?rows:[])].filter(a=>!/(^|[\s_-])inkis([\s_-]|$)/i.test(String(a.name||"")+" "+String(a.slug||"")));render();if(isAdmin)setTimeout(()=>autoRecognizeMissingIcons(),400)}catch(e){if(/sessão|login/i.test(e.message))return logout(false);toast(e.message);apps=[...builtin];render()}}
+async function loadApps(){try{const [rows,rules]=await Promise.all([rest("plv_apps?select=*&order=sort_order.asc,name.asc"),rest("plv_app_demo_rules?select=app_id,action_code,daily_limit,enabled,description&enabled=eq.true")]);const demoMap=new Map();(Array.isArray(rules)?rules:[]).forEach(rule=>{const key=String(rule.app_id);if(!demoMap.has(key))demoMap.set(key,[]);demoMap.get(key).push(rule)});apps=[...builtin,...(Array.isArray(rows)?rows:[])].map(a=>({...a,_demo_rules:demoMap.get(String(a.id))||[]})).filter(a=>!/(^|[\s_-])inkis([\s_-]|$)/i.test(String(a.name||"")+" "+String(a.slug||"")));render();if(isAdmin)setTimeout(()=>autoRecognizeMissingIcons(),400)}catch(e){if(/sessão|login/i.test(e.message))return logout(false);toast(e.message);apps=[...builtin];render()}}
 function categories(){const list=["Todos",...new Set(apps.filter(a=>a.status==="published"||isAdmin||a.builtin).map(a=>a.category||"Geral"))];$("#categories").innerHTML=list.map(c=>`<button class="chip ${c===filter?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");$$('[data-cat]').forEach(b=>b.onclick=()=>{filter=b.dataset.cat;render()})}
 
 function appInitials(name){
@@ -559,10 +559,11 @@ async function deleteIcon(path){
  try{await fetch(SUPABASE_URL+"/storage/v1/object/"+ICON_BUCKET,{method:"DELETE",headers:authHeaders({"Content-Type":"application/json"}),body:JSON.stringify({prefixes:[path]})})}catch{}
 }
 
+function hasDemoRules(a){return Array.isArray(a?._demo_rules)&&a._demo_rules.some(r=>r.enabled===true)}
 function card(a){
  const category=esc(a.category||"Geral");
- const demoAvailable=a.id==="8be8b024-b4cf-40d6-8970-30768d49f2a6"||a.id==="d0f53071-550f-4a6e-9cb9-959019339141";
- return `<article class="appcard"><div class="appicon">${iconVisual(a)}</div><h3>${esc(a.name)}</h3><p>${esc(a.description||"")}</p><div class="meta"><span class="badge">${category}</span>${demoAvailable?'<span class="badge">Demonstração gratuita</span>':""}</div><div class="cardactions">${a.id==="8be8b024-b4cf-40d6-8970-30768d49f2a6"?'<button class="primary" data-demo-open="'+a.id+'">▶ Testar demonstração</button>':'<button class="primary" data-open="'+a.id+'">Abrir</button>'}</div></article>`
+ const demoAvailable=hasDemoRules(a);
+ return `<article class="appcard"><div class="appicon">${iconVisual(a)}</div><h3>${esc(a.name)}</h3><p>${esc(a.description||"")}</p><div class="meta"><span class="badge">${category}</span>${demoAvailable?'<span class="badge">Demonstração gratuita</span>':""}</div><div class="cardactions">${demoAvailable?'<button class="primary" data-demo-open="'+a.id+'">▶ Testar demonstração</button>':'<button class="primary" data-open="'+a.id+'">Abrir</button>'}</div></article>`
 }
 function render(){const q=$("#search").value.trim().toLowerCase();const visible=apps.filter(a=>(a.status==="published"||isAdmin||a.builtin)&&(filter==="Todos"||a.category===filter)&&(!q||(a.name+" "+a.description+" "+a.category).toLowerCase().includes(q)));$("#appGrid").innerHTML=visible.length?visible.map(card).join(""):'<div class="empty">Nenhum aplicativo encontrado.</div>';categories();$$("[data-open]").forEach(b=>b.onclick=()=>openApp(apps.find(a=>String(a.id)===b.dataset.open)));$$("[data-demo-open]").forEach(b=>b.onclick=()=>openApp(apps.find(a=>String(a.id)===b.dataset.demoOpen),true))}
 async function fetchInternalHtml(path,asText=true){
@@ -609,9 +610,8 @@ function viewer(title,url,isBlob=false){
 }
 async function openApp(a,allowDemo=false){
  if(!a)return;
- const demoAvailable=a.id==="d0f53071-550f-4a6e-9cb9-959019339141";
- const chatDemo=a.id==="8be8b024-b4cf-40d6-8970-30768d49f2a6"&&allowDemo===true;
- if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan(a.id)&&!demoAvailable&&!chatDemo){showPlanModal(a.id);return}
+ const demoRequested=allowDemo===true&&hasDemoRules(a);
+ if(!isAdmin&&a.requires_plan!==false&&!hasActivePlan(a.id)&&!demoRequested){showPlanModal(a.id);return}
  let popup=null;
  try{
   if(a.builtin){
