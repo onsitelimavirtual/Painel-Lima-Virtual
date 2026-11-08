@@ -877,6 +877,53 @@ async function showPaymentsAdmin(){
   $("#paymentsBody").innerHTML=`<div class="notice warn">${esc(String(e.message||e))}</div>`
  }
 }
+
+async function showValuationPanel(){
+ if(!isAdmin){toast("Acesso restrito à administração.");return}
+ openModal("Valuation e Gestão Financeira",'<div class="notice">Indicadores financeiros carregados do Supabase. Avaliação por múltiplos é indicativa, não substitui laudo profissional. Receita histórica, recorrência e custo de reposição aparecem separados.</div><div id="valuationBody" style="display:grid;gap:12px;margin-top:12px"><div class="notice">Carregando dados financeiros…</div></div><div class="formactions"><button class="secondary" id="valuationRefresh">↻ Atualizar dados</button><button class="primary" id="valuationPrint">Imprimir relatório</button></div>');
+ const body=$("#valuationBody");
+ const money=v=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(v||0));
+ const count=v=>new Intl.NumberFormat("pt-BR").format(Number(v||0));
+ const render=async()=>{
+  body.innerHTML='<div class="notice">Consultando pedidos, planos, licenças e catálogo…</div>';
+  try{
+   const [orders,plans,licenses,appsRows]=await Promise.all([
+    rest("plv_orders?select=status,amount_cents,paid_at&order=paid_at.desc&limit=1000"),
+    rest("plv_plans?select=plan_code,amount_cents,duration_days,active"),
+    rest("plv_app_licenses?select=user_id,plan_code,status,expires_at&limit=2000"),
+    rest("plv_apps?select=id,status")
+   ]);
+   const paid=(orders||[]).filter(x=>x.status==="paid"),refunded=(orders||[]).filter(x=>x.status==="refunded");
+   const paidCents=paid.reduce((a,x)=>a+Number(x.amount_cents||0),0),refundedCents=refunded.reduce((a,x)=>a+Number(x.amount_cents||0),0);
+   const active=(licenses||[]).filter(x=>x.status==="active"&&x.expires_at&&new Date(x.expires_at).getTime()>Date.now());
+   const customers=new Set(active.map(x=>x.user_id).filter(Boolean)).size;
+   let mrr=0,hasPricing=active.length>0;
+   active.forEach(l=>{const p=(plans||[]).find(x=>x.plan_code===l.plan_code);if(p&&Number(p.amount_cents)>0&&Number(p.duration_days)>0)mrr+=Number(p.amount_cents)*30/Number(p.duration_days);else hasPricing=false});
+   const arr=mrr*12,appCount=(appsRows||[]).filter(a=>a.status==="published").length;
+   const fmt=v=>money(v/100),low=arr,mid=arr*2,high=arr*3;
+   body.innerHTML=
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px">'+
+    '<div class="notice"><small>Receita registrada como paga</small><strong style="display:block;color:var(--strong);font-size:1.05rem">'+fmt(paidCents)+'</strong><small>'+count(paid.length)+' pedidos</small></div>'+
+    '<div class="notice"><small>Estornos registrados</small><strong style="display:block;color:var(--strong);font-size:1.05rem">'+fmt(refundedCents)+'</strong><small>'+count(refunded.length)+' pedidos</small></div>'+
+    '<div class="notice"><small>Licenças ativas</small><strong style="display:block;color:var(--strong);font-size:1.05rem">'+count(active.length)+'</strong><small>'+count(customers)+' cliente(s) distintos</small></div>'+
+    '<div class="notice"><small>Aplicativos publicados</small><strong style="display:block;color:var(--strong);font-size:1.05rem">'+count(appCount)+'</strong><small>Catálogo atual</small></div></div>'+
+    '<div class="notice '+(hasPricing?'ok':'warn')+'"><strong>MRR estimado: '+(hasPricing?fmt(mrr):'não calculável')+'</strong><br>'+(hasPricing?'Calculado pelas licenças ativas e preço/duração cadastrados nos planos. Não garante renovação.':'Não foi possível associar preço e duração a todas as licenças ativas. Revise o cadastro de planos.')+'<br>ARR estimado: '+(hasPricing?fmt(arr):'—')+'</div>'+
+    '<section style="border:1px solid var(--line);border-radius:14px;padding:12px"><strong style="color:var(--strong)">Faixa indicativa por múltiplos do ARR</strong><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:9px">'+
+    '<div class="notice"><small>Conservador · 1×</small><strong style="display:block;color:var(--strong)">'+(hasPricing?fmt(low):'—')+'</strong></div>'+
+    '<div class="notice"><small>Base · 2×</small><strong style="display:block;color:var(--strong)">'+(hasPricing?fmt(mid):'—')+'</strong></div>'+
+    '<div class="notice"><small>Otimista · 3×</small><strong style="display:block;color:var(--strong)">'+(hasPricing?fmt(high):'—')+'</strong></div></div><small style="color:var(--muted)">Múltiplos ilustrativos para simulação inicial. A base de clientes ainda é pequena; não representam preço de venda garantido.</small></section>'+
+    '<section style="border:1px solid var(--line);border-radius:14px;padding:12px"><strong style="color:var(--strong)">Custo de reposição do ativo intelectual</strong><div class="formrow" style="margin-top:9px"><label>Horas de desenvolvimento<input id="valDevHours" type="number" min="0" step="1" value="0"></label><label>Valor por hora (R$)<input id="valHourRate" type="number" min="0" step="1" value="100"></label></div><label style="display:block;margin-top:8px">Desconto por risco/obsolescência: <strong id="valRiskLabel">40%</strong><input id="valRisk" type="range" min="0" max="90" step="5" value="40"></label><div class="notice" style="margin-top:8px">Referência calculada: <strong id="valReplacement" style="color:var(--strong)">'+money(0)+'</strong><br><small>Informe horas e taxa com base em registros reais. Este método fica separado do múltiplo de receita.</small></div></section>'+
+    '<div class="notice warn"><strong>Qualidade da evidência: limitada</strong><br>Base observada: '+count(paid.length)+' pedidos pagos, '+count(refunded.length)+' estornos, '+count(active.length)+' licenças ativas e '+count(customers)+' cliente(s) ativo(s). O banco retornou '+count(orders.length)+' pedidos (limite de 1.000). Ainda é necessário conciliar Kiwify, custos, despesas, impostos, horas de desenvolvimento, propriedade intelectual e retenção para um valuation formal.</div>'+
+    '<small style="color:var(--muted)">Atualizado em '+new Date().toLocaleString("pt-BR")+'. Pedidos fora do limite e eventos não conciliados podem não estar incluídos.</small>';
+   const updateReplacement=()=>{const h=Number($("#valDevHours").value||0),r=Number($("#valHourRate").value||0),d=Number($("#valRisk").value||0);$("#valRiskLabel").textContent=d+"%";$("#valReplacement").textContent=money(h*r*(1-d/100))};
+   ["valDevHours","valHourRate","valRisk"].forEach(id=>$("#"+id).addEventListener("input",updateReplacement));
+  }catch(e){body.innerHTML='<div class="notice warn">Não foi possível carregar os dados: '+esc(e.message||e)+'. Verifique as permissões administrativas e tente novamente.</div>'}
+ };
+ $("#valuationRefresh").onclick=render;
+ $("#valuationPrint").onclick=()=>window.print();
+ await render();
+}
+
 function showAdminPanel(){
  const managed=apps.filter(a=>!a.builtin);
  openModal("Administração",`<div class="notice">Ferramentas administrativas ficam concentradas aqui. Usuários comuns não veem esta área.</div>
@@ -884,12 +931,13 @@ function showAdminPanel(){
   <button class="primary" id="adminNew">＋ Implantar</button>
   <button class="secondary" id="adminPlan">◇ Plano Educacional</button>
   <button class="secondary" id="adminPayments">$ Pagamentos</button>
+  <button class="secondary" id="adminValuation">▥ Valuation financeiro</button>
   <button class="secondary" id="adminRefresh">↻ Atualizar</button>
   <button class="secondary" id="adminIcons">◈ Reconhecer ícones</button>
   <button class="secondary" id="adminDiag">✓ Diagnóstico</button>
  </div>
  <div class="admin-list">${managed.length?managed.map(a=>`<div class="admin-app-row"><div class="appicon">${iconVisual(a)}</div><div><strong>${esc(a.name)}</strong><small>${esc(a.status||"")} • ${esc(a.category||"Geral")}</small></div><button class="secondary" data-admin-edit="${a.id}">Editar</button></div>`).join(""):'<div class="notice">Nenhum subsistema cadastrado.</div>'}</div>`);
- $("#adminNew").onclick=()=>{closeModal();installForm()};$("#adminPlan").onclick=()=>{closeModal();showPlanAdmin()};$("#adminPayments").onclick=()=>{closeModal();showPaymentsAdmin()};
+ $("#adminNew").onclick=()=>{closeModal();installForm()};$("#adminPlan").onclick=()=>{closeModal();showPlanAdmin()};$("#adminPayments").onclick=()=>{closeModal();showPaymentsAdmin()};$("#adminValuation").onclick=()=>{closeModal();showValuationPanel()};
  $("#adminRefresh").onclick=async()=>{await loadApps();toast("Catálogo atualizado");closeModal();showAdminPanel()};
  $("#adminIcons").onclick=()=>{closeModal();recognizeAllIcons()};
  $("#adminDiag").onclick=()=>{closeModal();diagnoseApps()};
