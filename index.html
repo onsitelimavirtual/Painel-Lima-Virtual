@@ -770,7 +770,22 @@ async function deleteStorage(path){
  try{
   await fetch(SUPABASE_URL+"/storage/v1/object/"+BUCKET,{method:"DELETE",headers:authHeaders({"Content-Type":"application/json"}),body:JSON.stringify({prefixes:[path]}),signal:ctl.signal})
  }catch{}finally{clearTimeout(tm)}
-}async function deleteApp(a){if(!a||a.builtin)return;if(!confirm('Excluir "'+a.name+'"?'))return;try{await rest("plv_apps?id=eq."+encodeURIComponent(a.id),{method:"DELETE"});if(a.storage_path)await deleteStorage(a.storage_path);if(a.icon_storage_path)await deleteIcon(a.icon_storage_path);await loadApps();toast("Subsistema excluído")}catch(e){const msg=String(e.message||e);if(/não encontrado no Storage/i.test(msg)&&isAdmin){toast('Arquivo do subsistema ausente. Edite ou reimplante o app.')}else{toast(msg)}}}function editApp(a){if(a)installForm(a)}
+}
+async function deleteApp(a){
+ if(!isAdmin){toast("Acesso restrito à administração.");return}
+ if(!a||a.builtin)return;
+ if(!confirm('Confirma a exclusão do aplicativo "'+a.name+'"? O cadastro será removido do catálogo.'))return;
+ try{
+  await rest("plv_apps?id=eq."+encodeURIComponent(a.id),{method:"DELETE"});
+  const storageErrors=[];
+  if(a.storage_path)try{await deleteStorage(a.storage_path)}catch(e){storageErrors.push(String(e.message||e))}
+  if(a.icon_storage_path)try{await deleteIcon(a.icon_storage_path)}catch(e){storageErrors.push(String(e.message||e))}
+  await loadApps();
+  closeModal();showAdminPanel();
+  toast(storageErrors.length?"Aplicativo removido do painel; houve falha na limpeza de um arquivo.":"Aplicativo excluído com sucesso.");
+ }catch(e){toast(String(e.message||e))}
+}
+function editApp(a){if(a)installForm(a)}
 
 
 async function recognizeAllIcons(){
@@ -942,12 +957,12 @@ function showAdminPanel(){
   <button class="secondary" id="adminIcons">◈ Reconhecer ícones</button>
   <button class="secondary" id="adminDiag">✓ Diagnóstico</button>
  </div>
- <div class="admin-list">${managed.length?managed.map(a=>`<div class="admin-app-row"><div class="appicon">${iconVisual(a)}</div><div><strong>${esc(a.name)}</strong><small>${esc(a.status||"")} • ${esc(a.category||"Geral")}</small></div><button class="secondary" data-admin-edit="${a.id}">Editar</button></div>`).join(""):'<div class="notice">Nenhum subsistema cadastrado.</div>'}</div>`);
+ <div class="admin-list">${managed.length?managed.map(a=>`<div class="admin-app-row"><div class="appicon">${iconVisual(a)}</div><div><strong>${esc(a.name)}</strong><small>${esc(a.status||"")} • ${esc(a.category||"Geral")}</small></div><button class="secondary" data-admin-edit="${a.id}">Editar</button><button class="secondary danger" data-admin-delete="${a.id}" aria-label="Excluir ${esc(a.name)}">Excluir</button></div>`).join(""):'<div class="notice">Nenhum subsistema cadastrado.</div>'}</div>`);
  $("#adminNew").onclick=()=>{closeModal();installForm()};$("#adminPlan").onclick=()=>{closeModal();showPlanAdmin()};$("#adminPayments").onclick=()=>{closeModal();showPaymentsAdmin()};$("#adminValuation").onclick=()=>{closeModal();showValuationPanel()};
  $("#adminRefresh").onclick=async()=>{await loadApps();toast("Catálogo atualizado");closeModal();showAdminPanel()};
  $("#adminIcons").onclick=()=>{closeModal();recognizeAllIcons()};
  $("#adminDiag").onclick=()=>{closeModal();diagnoseApps()};
- $$("[data-admin-edit]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminEdit);closeModal();editApp(a)})
+ $("[data-admin-edit]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminEdit);closeModal();editApp(a)});\n $("[data-admin-delete]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminDelete);if(a)deleteApp(a)})
 }
 function profile(){
  openModal("Perfil",`<div class="notice ${isAdmin?"ok":hasActivePlan()?"ok":"warn"}"><strong>${esc(session?.user?.email||"Usuário")}</strong><br>${isAdmin?"Administrador do Painel Lima Virtual":hasActivePlan()?"Plano "+esc(currentLicense?.plan_code||"ativo")+" • válido até "+esc(formatDateBR(currentLicense?.expires_at)):"Sem plano ativo"}</div>
