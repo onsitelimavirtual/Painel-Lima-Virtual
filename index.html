@@ -962,7 +962,8 @@ function showAdminPanel(){
  $("#adminRefresh").onclick=async()=>{await loadApps();toast("Catálogo atualizado");closeModal();showAdminPanel()};
  $("#adminIcons").onclick=()=>{closeModal();recognizeAllIcons()};
  $("#adminDiag").onclick=()=>{closeModal();diagnoseApps()};
- $("[data-admin-edit]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminEdit);closeModal();editApp(a)});\n $("[data-admin-delete]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminDelete);if(a)deleteApp(a)})
+ $("[data-admin-edit]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminEdit);closeModal();editApp(a)});
+ $("[data-admin-delete]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>String(x.id)===b.dataset.adminDelete);if(a)deleteApp(a)})
 }
 function profile(){
  openModal("Perfil",`<div class="notice ${isAdmin?"ok":hasActivePlan()?"ok":"warn"}"><strong>${esc(session?.user?.email||"Usuário")}</strong><br>${isAdmin?"Administrador do Painel Lima Virtual":hasActivePlan()?"Plano "+esc(currentLicense?.plan_code||"ativo")+" • válido até "+esc(formatDateBR(currentLicense?.expires_at)):"Sem plano ativo"}</div>
