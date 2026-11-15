@@ -25,7 +25,7 @@
 @media(max-width:850px){.evidence-grid{grid-template-columns:1fr}.source-actions,.analyzer-grid,.materials-grid{grid-template-columns:1fr}.analyzer-grid .full{grid-column:auto}.brand-logo{width:40px;height:38px}.sidebar{gap:4px}.nav-item{font-size:12px}}
 
 .visual-preview{margin:14px 0;max-width:680px}.visual-preview svg{display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 8px 26px rgba(20,33,61,.14)}
-.visual-studio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.visual-studio .field{min-width:0}.visual-studio input,.visual-studio select{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff;color:var(--ink);font:14px inherit}.visual-preview{width:100%;max-width:680px;margin:16px auto;overflow:visible}.visual-preview svg{display:block;width:100%;height:auto;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:0 8px 26px rgba(20,33,61,.14)}.visual-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.visual-actions .btn{flex:1 1 150px}.visual-help{font-size:12px;color:var(--muted);margin:6px 0 0}@media(max-width:650px){.visual-studio{grid-template-columns:1fr}.visual-preview{max-width:100%}.visual-preview svg{max-height:none}.visual-actions .btn{flex:1 1 100%}}
+.visual-studio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0;min-width:0}.visual-studio .field{min-width:0}.visual-studio input,.visual-studio select{box-sizing:border-box;width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff;color:var(--ink);font:14px inherit}.analyzer-panel,.panel,.materials-grid,.material-card,.visual-preview{box-sizing:border-box;min-width:0;max-width:100%}.visual-preview{width:100%;max-width:680px;margin:16px auto;overflow:hidden;border-radius:14px}.visual-preview svg{display:block;width:100%;max-width:100%;height:auto;max-height:none;object-fit:contain;border-radius:14px;box-shadow:0 8px 26px rgba(20,33,61,.14)}.visual-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;min-width:0}.visual-actions .btn{flex:1 1 150px;min-width:0;white-space:normal}.visual-help{font-size:12px;color:var(--muted);margin:6px 0 0}@media(max-width:650px){.visual-studio{grid-template-columns:minmax(0,1fr)}.visual-preview{width:100%;max-width:100%;margin:12px 0}.visual-actions .btn{flex:1 1 100%}}
 
 
   </style>
@@ -262,13 +262,13 @@ window.applyProductAnalysis = function(profile){
   }
   function promoSvg(p,format,customTitle,customCta){
     const story=format==='story',w=1080,h=story?1920:1080,title=String(customTitle||p.product_name||'Seu produto').trim(),desc=String(p.summary||'Conheça esta solução').trim(),site=p.sources?.site||'',ctaLabel=String(customCta||'SAIBA MAIS').trim().slice(0,28)||'SAIBA MAIS';
-    const titleLines=wrapText(title,story?21:24,story?4:3),descLines=wrapText(desc,story?37:48,story?5:4);
-    const titleY=story?530:340,titleSize=story?72:68,titleGap=story?88:76,descY=titleY+titleLines.length*titleGap+40,descGap=story?52:42;
-    const ctaY=Math.max(story?1320:760,descY+descLines.length*descGap+65),ctaW=story?610:450,ctaX=(w-ctaW)/2,siteY=ctaY+180,footerY=siteY+105;
+    const titleLines=wrapText(title,story?21:24,story?4:3),descLines=wrapText(desc,story?37:48,story?4:3);
+    const titleY=story?530:340,titleSize=story?70:64,titleGap=story?82:74,descY=story?900:570,descGap=story?48:40,descSize=story?32:30;
+    const ctaY=story?1280:735,ctaW=story?610:450,ctaX=(w-ctaW)/2,siteY=story?1470:890,footerY=story?1580:975;
     const safeSite=svgEscape(site.slice(0,68));
     const ctaShape='<rect x="'+ctaX+'" y="'+ctaY+'" width="'+ctaW+'" height="104" rx="22" fill="url(#dc-gold)"/><text x="540" y="'+(ctaY+66)+'" text-anchor="middle" fill="#14213d" font-family="Arial,sans-serif" font-size="34" font-weight="700">'+svgEscape(ctaLabel)+'</text>';
     const ctaMarkup=site&&/^https?:\/\//i.test(site)?'<a href="'+svgEscape(site)+'" target="_blank" rel="noopener noreferrer">'+ctaShape+'</a>':ctaShape;
-    const titleSvg=svgText(titleLines,84,titleY,titleSize,titleGap,'#ffffff',700),descSvg=svgText(descLines,86,descY,story?34:32,descGap,'#dbe8ff',400);
+    const titleSvg=svgText(titleLines,84,titleY,titleSize,titleGap,'#ffffff',700),descSvg=svgText(descLines,86,descY,descSize,descGap,'#dbe8ff',400);
     return ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Arte promocional de '+svgEscape(title)+'">',
       '<defs><linearGradient id="dc-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101d3a"/><stop offset="1" stop-color="#173d79"/></linearGradient><linearGradient id="dc-gold"><stop stop-color="#fff0a8"/><stop offset="1" stop-color="#d99b27"/></linearGradient></defs>',
       '<rect width="1080" height="'+h+'" rx="48" fill="url(#dc-bg)"/><circle cx="930" cy="'+(story?250:130)+'" r="250" fill="#1f65bd" opacity=".22"/><path d="M80 '+(story?300:160)+'H1000" stroke="url(#dc-gold)" stroke-width="5"/>',
@@ -276,7 +276,7 @@ window.applyProductAnalysis = function(profile){
       '<text x="84" y="'+siteY+'" fill="#b9c9e5" font-family="Arial,sans-serif" font-size="22">'+safeSite+'</text><text x="84" y="'+footerY+'" fill="#f4d47d" font-family="Arial,sans-serif" font-size="19">Conheça. Explore. Decida.</text>',
       '</svg>'].join('');
   }
-  function currentArtwork(){if(!latest)return '';return promoSvg(latest,$('intel-art-format').value,$('intel-art-headline').value,$('intel-art-cta').value);}
+    function currentArtwork(){if(!latest)return '';return promoSvg(latest,$('intel-art-format').value,$('intel-art-headline').value,$('intel-art-cta').value);}
   function refreshArtwork(){if(latest)$('intel-visual-preview').innerHTML=currentArtwork();}
   function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1200);}
   function productUrl(){const u=latest?.sources?.site||'';try{const parsed=new URL(u);return ['http:','https:'].includes(parsed.protocol)?parsed.href:'';}catch{return '';}}
