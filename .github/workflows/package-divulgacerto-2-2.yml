@@ -20,7 +20,7 @@ on:
       - 'supabase_schema.sql'
       - 'test_analyzer.py'
       - 'DEPLOY-RENDER-DIVULGACERTO.md'
-      - '.github/workflows/package-divulgacerto-2-1.yml'
+      - 'divulgacerto_2_2_metrics.sql'\n      - '.github/workflows/package-divulgacerto-2-2.yml'
   workflow_dispatch:
 jobs:
   qa-and-package:
@@ -45,7 +45,10 @@ jobs:
           assert manifest['short_name']=='DivulgaCerto 2.2'
           for name in ['divulgacerto_2_2_metrics.sql','config.js','sw.js','termos.html','privacidade.html','divulgacerto-icon-512.png','divulgacerto-marca.png','divulgacerto-identidade.png']:
               assert pathlib.Path(name).exists(), f'Arquivo ausente: {name}'
-          import re, subprocess\n          scripts=re.findall(r'<script>(.*?)</script>',html,re.S)\n          pathlib.Path('/tmp/divulgacerto-inline.js').write_text('\\n'.join(scripts),encoding='utf-8')\n          subprocess.run(['node','--check','/tmp/divulgacerto-inline.js'],check=True)\n          print('Frontend, JavaScript e manifesto: OK')
+          import re, subprocess
+          scripts=re.findall(r'<script>(.*?)</script>',html,re.S)
+          pathlib.Path('/tmp/divulgacerto-inline.js').write_text('\\n'.join(scripts),encoding='utf-8')
+          subprocess.run(['node','--check','/tmp/divulgacerto-inline.js'],check=True)\n          print('Frontend, JavaScript e manifesto: OK')
           PY
       - name: Assemble package
         run: |
