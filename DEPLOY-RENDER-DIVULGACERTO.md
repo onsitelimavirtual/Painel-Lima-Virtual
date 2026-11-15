@@ -31,3 +31,35 @@ O HTML carrega `config.js` externamente; não duplique a configuração dentro d
 - Sites que exigem login, bloqueiam robôs ou dependem de JavaScript podem não fornecer conteúdo suficiente.
 - O plano gratuito do Render pode suspender serviços ociosos e aumentar o tempo da primeira resposta.
 - Antes de uso público, revisar CORS para restringir a origem ao domínio publicado do DivulgaCerto e adicionar limites de requisição/monitoramento.
+
+## Ativar métricas reais — DivulgaCerto 2.2
+
+1. No Supabase SQL Editor, execute o arquivo `divulgacerto_2_2_metrics.sql` deste repositório.
+2. No Render, abra o serviço da API → **Environment** e configure:
+   - `SUPABASE_URL`: URL do projeto Supabase.
+   - `SUPABASE_SERVICE_ROLE_KEY`: chave secreta service_role do projeto. Cadastre somente no Render; nunca no `config.js`, HTML ou GitHub.
+   - `PUBLIC_API_URL`: URL pública HTTPS da API Render, sem barra final.
+   - `DIVULGACERTO_WEBHOOK_TOKEN`: token aleatório forte, criado por você para autenticar o webhook de conversões.
+3. Salve e faça novo deploy. O endpoint `/health` deve indicar versão 2.2.0.
+4. No aplicativo, entre com Google, abra uma campanha e clique em **Gerar link rastreável**. Divulgue esse link em vez do destino original. Cada visita ao link conta um clique antes do redirecionamento.
+5. A contagem automática aparece quando o usuário autenticado abre a campanha novamente. Os cliques só são rastreados em links criados pelo botão; links antigos não são retroativamente rastreados.
+
+### Webhook de conversões
+A API aceita POST em `/api/webhooks/conversion`, com cabeçalho `X-Webhook-Token` igual ao segredo cadastrado no Render e JSON:
+```json
+{
+  "campaign_id": "ID-DA-CAMPANHA",
+  "order_id": "ID-UNICO-DO-PEDIDO",
+  "amount": 49.90,
+  "currency": "BRL",
+  "status": "approved",
+  "source": "kiwify"
+}
+```
+Somente status aprovados/pagos/concluídos são registrados. O identificador `order_id` é único para evitar duplicidade. O webhook exige que sua integração envie o ID da campanha correspondente; a configuração do webhook na plataforma de checkout é uma etapa separada.
+
+### Limitações e proteção
+- Cliques são contados por acesso ao link, não são deduplicados por pessoa/dispositivo e podem incluir robôs ou pré-visualizações de mensageiros.
+- Conversões automáticas só aparecem depois que o checkout estiver configurado para enviar o webhook com o ID da campanha e o token secreto.
+- Conversões inseridas manualmente permanecem disponíveis como registro manual.
+- Configure limites de requisição e monitore o uso da API antes de divulgar links em larga escala.
