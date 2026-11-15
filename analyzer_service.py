@@ -11,7 +11,7 @@ import httpx
 from bs4 import BeautifulSoup
 
 app = FastAPI(title="DivulgaCerto Product Intelligence API", version="1.2.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["POST", "GET"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["https://onsitelimavirtual.github.io"], allow_methods=["POST", "GET"], allow_headers=["*"])
 MAX_ZIP = 50 * 1024 * 1024
 MAX_SITE = 2 * 1024 * 1024
 MAX_FILES = 250
