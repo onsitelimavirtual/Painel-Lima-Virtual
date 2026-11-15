@@ -25,6 +25,8 @@
 @media(max-width:850px){.evidence-grid{grid-template-columns:1fr}.source-actions,.analyzer-grid,.materials-grid{grid-template-columns:1fr}.analyzer-grid .full{grid-column:auto}.brand-logo{width:40px;height:38px}.sidebar{gap:4px}.nav-item{font-size:12px}}
 
 .visual-preview{margin:14px 0;max-width:680px}.visual-preview svg{display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 8px 26px rgba(20,33,61,.14)}
+.visual-studio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.visual-studio .field{min-width:0}.visual-studio input,.visual-studio select{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff;color:var(--ink);font:14px inherit}.visual-preview{width:100%;max-width:680px;margin:16px auto;overflow:visible}.visual-preview svg{display:block;width:100%;height:auto;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:0 8px 26px rgba(20,33,61,.14)}.visual-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.visual-actions .btn{flex:1 1 150px}.visual-help{font-size:12px;color:var(--muted);margin:6px 0 0}@media(max-width:650px){.visual-studio{grid-template-columns:1fr}.visual-preview{max-width:100%}.visual-preview svg{max-height:none}.visual-actions .btn{flex:1 1 100%}}
+
 
   </style>
 </head>
@@ -120,7 +122,23 @@
             <section class="panel evidence-inferred"><h2>◇ Inferências</h2><p class="muted">Classificações automáticas que precisam de confirmação.</p><div id="intel-inferred"></div></section>
             <section class="panel evidence-pending"><h2>! Informações pendentes</h2><p class="muted">Confirme estes pontos antes de publicar uma campanha.</p><div id="intel-pending"></div></section>
           </div>
-          <div class="panel"><h2>Materiais avançados preparados</h2><p class="muted">Variações de texto, roteiro curto, estrutura de carrossel e briefing visual. Revise tudo antes de publicar.</p><div id="intel-materials" class="materials-grid"></div><div id="intel-visual-preview" class="visual-preview"></div><div class="form-actions"><button id="download-visual-btn" class="btn btn-outline" type="button">Baixar arte promocional SVG</button><button id="use-analysis-btn" class="btn btn-primary" type="button">Usar análise e criar campanha</button><button id="export-analysis-btn" class="btn btn-outline" type="button">Exportar análise JSON</button></div></div>
+          <div class="panel"><h2>Materiais avançados preparados</h2><p class="muted">Variações de texto, roteiro curto, estrutura de carrossel e briefing visual. Revise tudo antes de publicar.</p><div id="intel-materials" class="materials-grid"></div>
+            <h2 style="margin-top:24px">Estúdio inteligente de artes</h2>
+            <p class="muted">Personalize a mensagem, escolha o formato e teste a chamada para ação antes de exportar.</p>
+            <div class="visual-studio">
+              <label class="field">Formato da arte<select id="intel-art-format"><option value="square">Quadrado · Feed (1:1)</option><option value="story">Vertical · Stories/Reels (9:16)</option></select></label>
+              <label class="field">Título da arte<input id="intel-art-headline" maxlength="90" placeholder="Título principal"></label>
+              <label class="field">Texto do botão<input id="intel-art-cta" maxlength="28" value="SAIBA MAIS"></label>
+            </div>
+            <div id="intel-visual-preview" class="visual-preview" aria-label="Prévia da arte promocional"></div>
+            <p class="visual-help">O botão dourado dentro da arte é clicável quando existe um link público válido. Revise as informações antes de publicar.</p>
+            <div class="visual-actions">
+              <button id="art-open-link-btn" class="btn btn-outline" type="button">↗ Testar botão da arte</button>
+              <button id="art-copy-link-btn" class="btn btn-outline" type="button">Copiar link do produto</button>
+              <button id="download-visual-btn" class="btn btn-outline" type="button">Baixar SVG</button>
+              <button id="download-png-btn" class="btn btn-primary" type="button">Baixar PNG</button>
+            </div>
+            <div class="form-actions"><button id="use-analysis-btn" class="btn btn-primary" type="button">Usar análise e criar campanha</button><button id="export-analysis-btn" class="btn btn-outline" type="button">Exportar análise JSON</button></div></div>
         </div>
       </section>
 
@@ -234,11 +252,38 @@ window.applyProductAnalysis = function(profile){
     return [{title:'WhatsApp · abordagem pessoal',text:wa},{title:'Instagram · legenda',text:ig},{title:'Facebook · publicação',text:fb},{title:'Carrossel · 5 telas',text:carousel},{title:'Reels · roteiro',text:reel},{title:'Briefing visual',text:visual}];
   }
   function svgEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));}
-  function promoSvg(p){const title=svgEscape(p.product_name||'Seu produto');const desc=svgEscape((p.summary||'Conheça esta solução').slice(0,115));const site=svgEscape(p.sources?.site||'');return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101d3a"/><stop offset="1" stop-color="#173d79"/></linearGradient><linearGradient id="gold"><stop stop-color="#fff0a8"/><stop offset="1" stop-color="#d99b27"/></linearGradient></defs><rect width="1080" height="1080" rx="48" fill="url(#bg)"/><circle cx="930" cy="130" r="250" fill="#1f65bd" opacity=".22"/><path d="M80 160H1000" stroke="url(#gold)" stroke-width="5"/><text x="82" y="115" fill="#f4d47d" font-family="Arial,sans-serif" font-size="34" letter-spacing="8">DIVULGACERTO</text><text x="82" y="370" fill="#fff" font-family="Arial,sans-serif" font-size="74" font-weight="700">${title.slice(0,45)}</text><foreignObject x="84" y="435" width="900" height="250"><div xmlns="http://www.w3.org/1999/xhtml" style="font:36px Arial,sans-serif;color:#dbe8ff;line-height:1.35">${desc}</div></foreignObject><rect x="82" y="760" width="450" height="92" rx="18" fill="url(#gold)"/><text x="125" y="820" fill="#14213d" font-family="Arial,sans-serif" font-size="32" font-weight="700">SAIBA MAIS</text><text x="82" y="955" fill="#b9c9e5" font-family="Arial,sans-serif" font-size="22">${site.slice(0,65)}</text><text x="82" y="1015" fill="#f4d47d" font-family="Arial,sans-serif" font-size="19">Arte-base editável · revise antes de publicar</text></svg>`;}
+  function wrapText(value,maxChars,maxLines){
+    const words=String(value||'').trim().split(/\\s+/).filter(Boolean);const lines=[];let line='';
+    for(const word of words){const next=line?line+' '+word:word;if(next.length>maxChars&&line){lines.push(line);line=word;}else line=next;}
+    if(line)lines.push(line);if(lines.length>maxLines){lines.length=maxLines;lines[maxLines-1]=lines[maxLines-1].replace(/[.,;:]?$/,'')+'…';}return lines;
+  }
+  function svgText(lines,x,y,size,lineHeight,fill,weight){
+    return '<text x="'+x+'" y="'+y+'" fill="'+fill+'" font-family="Arial,sans-serif" font-size="'+size+'" font-weight="'+(weight||400)+'">'+lines.map((line,i)=>'<tspan x="'+x+'" dy="'+(i?lineHeight:0)+'">'+svgEscape(line)+'</tspan>').join('')+'</text>';
+  }
+  function promoSvg(p,format,customTitle,customCta){
+    const story=format==='story',w=1080,h=story?1920:1080,title=String(customTitle||p.product_name||'Seu produto').trim(),desc=String(p.summary||'Conheça esta solução').trim(),site=p.sources?.site||'',cta=String(customCta||'SAIBA MAIS').trim().slice(0,28)||'SAIBA MAIS';
+    const titleLines=wrapText(title,story?21:24,story?4:3),descLines=wrapText(desc,story?37:48,story?5:4);
+    const titleY=story?570:390, titleSize=story?72:68, titleGap=story?88:82, descY=titleY+titleLines.length*titleGap+55, descGap=story?54:46;
+    const ctaY=story?1390:760,ctaW=story?610:450,ctaX=(w-ctaW)/2,siteY=story?1600:955,footerY=story?1770:1015;
+    const safeSite=svgEscape(site.slice(0,68));
+    const ctaShape='<rect x="'+ctaX+'" y="'+ctaY+'" width="'+ctaW+'" height="104" rx="22" fill="url(#gold)"/><text x="540" y="'+(ctaY+66)+'" text-anchor="middle" fill="#14213d" font-family="Arial,sans-serif" font-size="34" font-weight="700">'+svgEscape(cta)+'</text>';
+    const cta=site&&/^https?:\\/\\//i.test(site)?'<a href="'+svgEscape(site)+'" target="_blank" rel="noopener noreferrer">'+ctaShape+'</a>':ctaShape;
+    const titleSvg=svgText(titleLines,84,titleY,titleSize,titleGap,'#ffffff',700),descSvg=svgText(descLines,86,descY,story?34:32,descGap,'#dbe8ff',400);
+    return ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Arte promocional de '+svgEscape(title)+'">',
+      '<defs><linearGradient id="dc-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101d3a"/><stop offset="1" stop-color="#173d79"/></linearGradient><linearGradient id="dc-gold"><stop stop-color="#fff0a8"/><stop offset="1" stop-color="#d99b27"/></linearGradient></defs>',
+      '<rect width="1080" height="'+h+'" rx="48" fill="url(#dc-bg)"/><circle cx="930" cy="'+(story?250:130)+'" r="250" fill="#1f65bd" opacity=".22"/><path d="M80 '+(story?300:160)+'H1000" stroke="url(#dc-gold)" stroke-width="5"/>',
+      '<text x="84" y="'+(story?220:115)+'" fill="#f4d47d" font-family="Arial,sans-serif" font-size="34" letter-spacing="8">DIVULGACERTO</text>',titleSvg,descSvg,cta,
+      '<text x="84" y="'+siteY+'" fill="#b9c9e5" font-family="Arial,sans-serif" font-size="22">'+safeSite+'</text><text x="84" y="'+footerY+'" fill="#f4d47d" font-family="Arial,sans-serif" font-size="19">Conheça. Explore. Decida.</text>',
+      '</svg>'].join('');
+  }
+  function currentArtwork(){if(!latest)return '';return promoSvg(latest,$('intel-art-format').value,$('intel-art-headline').value,$('intel-art-cta').value);}
+  function refreshArtwork(){if(latest)$('intel-visual-preview').innerHTML=currentArtwork();}
+  function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1200);}
+  function productUrl(){const u=latest?.sources?.site||'';try{const parsed=new URL(u);return ['http:','https:'].includes(parsed.protocol)?parsed.href:'';}catch{return '';}}
   function render(p){
     $('intel-results').classList.remove('hidden');$('intel-product-name').textContent=p.product_name||'Produto não identificado';$('intel-summary').textContent=p.summary||'Não foi possível extrair resumo.';$('intel-type').textContent=p.product_type||'Tipo não identificado';$('intel-method').textContent=`Método: ${p.method||'análise automática'} · Trechos analisados: ${p.evidence_count??'não informado'}`;
     $('intel-confirmed').innerHTML=list(p.confirmed,'confirmed');$('intel-inferred').innerHTML=list(p.inferred,'inferred');$('intel-pending').innerHTML=list(p.pending,'pending');
-    const mats=buildMaterials(p);$('intel-materials').innerHTML=mats.map(m=>`<article class="material-card"><h3>${safe(m.title)}</h3><p>${safe(m.text)}</p></article>`).join('');$('intel-visual-preview').innerHTML=promoSvg(p);
+    const mats=buildMaterials(p);$('intel-materials').innerHTML=mats.map(m=>`<article class="material-card"><h3>${safe(m.title)}</h3><p>${safe(m.text)}</p></article>`).join('');$('intel-art-headline').value=p.product_name||'';$('intel-art-cta').value='SAIBA MAIS';refreshArtwork();
   }
   $('analyze-btn').addEventListener('click',async()=>{
     $('intel-error').textContent='';$('intel-progress').textContent='';$('intel-results').classList.add('hidden');
@@ -254,8 +299,12 @@ window.applyProductAnalysis = function(profile){
     finally{$('analyze-btn').disabled=false;}
   });
   $('use-analysis-btn').addEventListener('click',()=>{if(!latest)return;window.applyProductAnalysis?.(latest);});
-  $('download-visual-btn').addEventListener('click',()=>{if(!latest)return;const blob=new Blob([promoSvg(latest)],{type:'image/svg+xml;charset=utf-8'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='divulgacerto-arte-promocional.svg';a.click();URL.revokeObjectURL(u);});
-  $('export-analysis-btn').addEventListener('click',()=>{if(!latest)return;const blob=new Blob([JSON.stringify(latest,null,2)],{type:'application/json'});const a=document.createElement('a');const u=URL.createObjectURL(blob);a.href=u;a.download='divulgacerto-analise-produto.json';a.click();URL.revokeObjectURL(u);});
+  ['intel-art-format','intel-art-headline','intel-art-cta'].forEach(id=>$(id).addEventListener('input',refreshArtwork));
+  $('art-open-link-btn').addEventListener('click',()=>{const url=productUrl();if(!url){toast('Esta análise não possui um link público válido.');return;}window.open(url,'_blank','noopener,noreferrer');});
+  $('art-copy-link-btn').addEventListener('click',async()=>{const url=productUrl();if(!url){toast('Não há link válido para copiar.');return;}try{await navigator.clipboard.writeText(url);toast('Link do produto copiado.');}catch{toast('Não foi possível copiar automaticamente neste navegador.');}});
+  $('download-visual-btn').addEventListener('click',()=>{if(!latest)return;downloadBlob(new Blob([currentArtwork()],{type:'image/svg+xml;charset=utf-8'}),'divulgacerto-arte-promocional.svg');});
+  $('download-png-btn').addEventListener('click',()=>{if(!latest)return;const svg=currentArtwork(),blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.fillStyle='#101d3a';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);URL.revokeObjectURL(url);canvas.toBlob(png=>{if(png)downloadBlob(png,'divulgacerto-arte-promocional.png');else toast('Não foi possível gerar o PNG.');},'image/png');};img.onerror=()=>{URL.revokeObjectURL(url);toast('Falha ao preparar a arte para PNG.');};img.src=url;});
+  $('export-analysis-btn').addEventListener('click',()=>{if(!latest)return;downloadBlob(new Blob([JSON.stringify(latest,null,2)],{type:'application/json'}),'divulgacerto-analise-produto.json');});
   // Carry inputs from the campaign form shortcut to the complete analyzer.
   document.querySelectorAll('[data-view="intelligence"]').forEach(b=>b.addEventListener('click',()=>{if($('source-site')?.value)$('intel-site').value=$('source-site').value;if($('source-zip')?.files?.[0]){const dt=new DataTransfer();dt.items.add($('source-zip').files[0]);$('intel-zip').files=dt.files;}}));
 })();
