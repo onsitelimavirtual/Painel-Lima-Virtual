@@ -229,8 +229,12 @@ async def tracking_stats(campaign_id: str, authorization: str|None=Header(defaul
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(401,"Entre com sua conta para consultar as métricas.")
     user_id=await _authenticated_user(authorization.split(" ",1)[1].strip())
+    owned=(await _sb_request("GET","divulgacerto_tracking_links",params={"campaign_id":"eq."+campaign_id,"user_id":"eq."+user_id,"select":"token","limit":"1"})).json()
+    if not owned: raise HTTPException(404,"Campanha sem link rastreável ou não pertence a esta conta.")
     rows=(await _sb_request("GET","divulgacerto_click_events",params={"campaign_id":"eq."+campaign_id,"user_id":"eq."+user_id,"select":"id,created_at"})).json()
-    return {"campaign_id":campaign_id,"clicks":len(rows),"events":rows}
+    conversions=(await _sb_request("GET","divulgacerto_conversion_events",params={"campaign_id":"eq."+campaign_id,"select":"order_id,amount,currency,created_at"})).json()
+    revenue=sum(float(x.get("amount") or 0) for x in conversions)
+    return {"campaign_id":campaign_id,"clicks":len(rows),"conversions":len(conversions),"revenue":round(revenue,2),"events":rows}
 
 @app.post("/api/webhooks/conversion")
 async def conversion_webhook(payload: ConversionEvent, x_webhook_token: str|None=Header(default=None)):
