@@ -1,6 +1,6 @@
-# DivulgaCerto — MVP 1.0
+# DivulgaCerto 2.0 — Inteligência de Produtos e Divulgação Multicanal
 
-Aplicação web responsiva para empreendedores criarem campanhas e prepararem conteúdos para WhatsApp, Instagram e Facebook.
+Aplicação web responsiva e instalável para empreendedores analisarem produtos, criarem campanhas e prepararem conteúdos para WhatsApp, Instagram e Facebook.
 
 ## O que funciona nesta versão
 
@@ -88,6 +88,24 @@ Os dados da campanha permanecem no navegador até que o usuário limpe os dados 
 
 Nome de trabalho: DivulgaCerto. Identificação autoral: Copyright © 2026 Nailson Lima. Inclui `termos.html` e `privacidade.html` como minutas preliminares. Substituir os campos `[INSERIR E-MAIL DE CONTATO CONFIRMADO]` e revisar juridicamente antes de lançamento público. A busca de nome no INPI ainda precisa de análise formal de anterioridade e classes.
 
+
+## DivulgaCerto 2.0 — consolidação e estabilidade
+
+### Melhorias desta versão
+- Corrigida a referência ao elemento de status da nuvem, que podia interromper a inicialização quando já havia uma sessão Google ativa.
+- A sincronização agora mantém o indicador de estado consistente e libera o bloqueio mesmo quando ocorre falha.
+- A autenticação mostra estado de inicialização e não dispara aviso temporário durante o carregamento da biblioteca.
+- Em falha persistente, o usuário recebe um estado discreto e pode tentar novamente; a operação local continua disponível.
+- O logout Supabase permanece normal, com alternativa local de segurança.
+- Identificação visual da versão 2.0, backup JSON com versão 2.0.0 e cache PWA renovado.
+- O atalho de instalação abre diretamente `DivulgaCerto-Android.html`.
+
+### Validação antes de considerar a versão estável
+- Testar login Google com sessão nova e sessão já existente.
+- Testar logout e novo login no mesmo dispositivo.
+- Testar sincronização com rede disponível e indisponível.
+- Confirmar que campanhas locais permanecem preservadas quando a nuvem falha.
+- Atualizar a PWA e confirmar que a versão 2.0 substitui o cache anterior.
 
 ## DivulgaCerto 1.2 — Inteligência de Produtos
 
