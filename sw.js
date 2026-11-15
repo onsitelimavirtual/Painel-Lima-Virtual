@@ -1,4 +1,4 @@
-const CACHE = "divulgacerto-static-v2-1";
+const CACHE = "divulgacerto-static-v2-2";
 const ASSETS = [
   "./",
   "./DivulgaCerto-Android.html",
