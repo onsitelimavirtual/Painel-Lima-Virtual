@@ -18,9 +18,10 @@ on:
       - 'requirements-analyzer.txt'
       - 'render.yaml'
       - 'supabase_schema.sql'
+      - 'divulgacerto_2_2_metrics.sql'
       - 'test_analyzer.py'
       - 'DEPLOY-RENDER-DIVULGACERTO.md'
-      - 'divulgacerto_2_2_metrics.sql'\n      - '.github/workflows/package-divulgacerto-2-2.yml'
+      - '.github/workflows/package-divulgacerto-2-2.yml'
   workflow_dispatch:
 jobs:
   qa-and-package:
@@ -30,14 +31,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Install API dependencies
         run: pip install -r requirements-analyzer.txt
       - name: Run automated tests
-        run: pytest -q test_analyzer.py
+        run: |
+          python -m py_compile analyzer_service.py
+          pytest -q test_analyzer.py
       - name: Validate frontend and metadata
         run: |
           python - <<'PY'
-          import json, pathlib
+          import json, pathlib, re, subprocess
           html=pathlib.Path('DivulgaCerto-Android.html').read_text(encoding='utf-8')
           manifest=json.loads(pathlib.Path('manifest.webmanifest').read_text(encoding='utf-8'))
           assert '<html lang="pt-BR">' in html
@@ -45,10 +51,10 @@ jobs:
           assert manifest['short_name']=='DivulgaCerto 2.2'
           for name in ['divulgacerto_2_2_metrics.sql','config.js','sw.js','termos.html','privacidade.html','divulgacerto-icon-512.png','divulgacerto-marca.png','divulgacerto-identidade.png']:
               assert pathlib.Path(name).exists(), f'Arquivo ausente: {name}'
-          import re, subprocess
           scripts=re.findall(r'<script>(.*?)</script>',html,re.S)
-          pathlib.Path('/tmp/divulgacerto-inline.js').write_text('\\n'.join(scripts),encoding='utf-8')
-          subprocess.run(['node','--check','/tmp/divulgacerto-inline.js'],check=True)\n          print('Frontend, JavaScript e manifesto: OK')
+          pathlib.Path('/tmp/divulgacerto-inline.js').write_text('\n'.join(scripts),encoding='utf-8')
+          subprocess.run(['node','--check','/tmp/divulgacerto-inline.js'],check=True)
+          print('Frontend, JavaScript e manifesto: OK')
           PY
       - name: Assemble package
         run: |
