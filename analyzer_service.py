@@ -2,15 +2,15 @@
 Não executa código recebido nem extrai arquivos para o sistema de arquivos.
 """
 from __future__ import annotations
-import io, ipaddress, json, re, socket, zipfile
+import io, ipaddress, json, re, socket, zipfile, os, uuid
 from html import unescape
 from urllib.parse import urlparse
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header\nfrom fastapi.responses import RedirectResponse\nfrom pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from bs4 import BeautifulSoup
 
-app = FastAPI(title="DivulgaCerto Product Intelligence API", version="2.1.0")
+app = FastAPI(title="DivulgaCerto Product Intelligence API", version="2.2.0")
 app.add_middleware(CORSMiddleware, allow_origins=["https://onsitelimavirtual.github.io"], allow_methods=["POST", "GET"], allow_headers=["*"])
 MAX_ZIP = 50 * 1024 * 1024
 MAX_SITE = 2 * 1024 * 1024
@@ -150,7 +150,7 @@ def analyze(entries: list[dict], url: str|None, filenames: list[str]) -> dict:
     return {'product_name':name or 'Produto não identificado','product_type':product_type,'summary':(evidence[0]['text'] if evidence else 'Não foi possível extrair texto útil das fontes.')[:500], 'confirmed':facts,'inferred':inferences,'pending':pending,'sources':{'site':url,'zip_files':filenames[:80]},'evidence_count':len(evidence),'method':'Extração e classificação heurística local; sem modelo generativo externo nesta API.'}
 
 @app.get('/health')
-def health(): return {'status':'ok','service':'DivulgaCerto Product Intelligence','version':'1.2.0'}
+def health(): return {'status':'ok','service':'DivulgaCerto Product Intelligence','version':'2.2.0'}
 
 @app.post('/api/analyze')
 async def analyze_product(site_url: str|None=Form(default=None), file: UploadFile|None=File(default=None)):
@@ -164,3 +164,80 @@ async def analyze_product(site_url: str|None=Form(default=None), file: UploadFil
         data=await file.read(MAX_ZIP+1)
         zip_entries,filenames=zip_extract(data); entries.extend(zip_entries)
     return analyze(entries,final_url,filenames)
+
+
+# DivulgaCerto 2.2 — rastreamento de cliques e conversões por webhook.
+# Configure no Render: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY e DIVULGACERTO_WEBHOOK_TOKEN.
+class TrackingRegistration(BaseModel):
+    campaign_id: str
+    destination: str
+
+class ConversionEvent(BaseModel):
+    campaign_id: str
+    order_id: str
+    amount: float | None = None
+    currency: str = "BRL"
+    status: str = "approved"
+    source: str = "webhook"
+
+def _supabase_env():
+    url=os.getenv("SUPABASE_URL","").rstrip("/")
+    key=os.getenv("SUPABASE_SERVICE_ROLE_KEY","")
+    if not url or not key:
+        raise HTTPException(503,"Rastreamento indisponível: configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no serviço.")
+    return url,key
+
+async def _sb_request(method: str, path: str, *, params=None, json_body=None, prefer=None, token=None):
+    url,key=_supabase_env()
+    headers={"apikey":key,"Authorization":f"Bearer {token or key}","Content-Type":"application/json"}
+    if prefer: headers["Prefer"]=prefer
+    async with httpx.AsyncClient(timeout=12) as client:
+        response=await client.request(method,url+"/rest/v1/"+path,params=params,json=json_body,headers=headers)
+    if response.status_code>=400:
+        raise HTTPException(502,"Falha ao consultar o banco de métricas. Verifique a migração SQL e as variáveis do Supabase.")
+    return response
+
+async def _authenticated_user(access_token: str) -> str:
+    url,key=_supabase_env()
+    async with httpx.AsyncClient(timeout=10) as client:
+        r=await client.get(url+"/auth/v1/user",headers={"apikey":key,"Authorization":"Bearer "+access_token})
+    if r.status_code!=200: raise HTTPException(401,"Sessão inválida. Entre novamente com sua conta Google.")
+    return str(r.json().get("id") or "")
+
+@app.post("/api/tracking/register")
+async def register_tracking_link(payload: TrackingRegistration, authorization: str|None=Header(default=None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(401,"Entre com sua conta para criar um link rastreável.")
+    user_id=await _authenticated_user(authorization.split(" ",1)[1].strip())
+    destination=public_url(payload.destination)
+    token=uuid.uuid4().hex
+    await _sb_request("POST","divulgacerto_tracking_links",json_body={"token":token,"campaign_id":payload.campaign_id,"user_id":user_id,"destination":destination},prefer="resolution=merge-duplicates,return=minimal")
+    base=os.getenv("PUBLIC_API_URL","https://divulgacerto-product-intelligence.onrender.com").rstrip("/")
+    return {"tracking_url":base+"/r/"+token,"campaign_id":payload.campaign_id}
+
+@app.get("/r/{token}")
+async def track_click(token: str):
+    if not re.fullmatch(r"[a-f0-9]{32}",token): raise HTTPException(404,"Link não encontrado.")
+    rows=(await _sb_request("GET","divulgacerto_tracking_links",params={"token":"eq."+token,"select":"campaign_id,user_id,destination","limit":"1"})).json()
+    if not rows: raise HTTPException(404,"Link de campanha não encontrado.")
+    row=rows[0]
+    await _sb_request("POST","divulgacerto_click_events",json_body={"token":token,"campaign_id":row["campaign_id"],"user_id":row["user_id"]},prefer="return=minimal")
+    return RedirectResponse(row["destination"],status_code=302)
+
+@app.get("/api/tracking/stats/{campaign_id}")
+async def tracking_stats(campaign_id: str, authorization: str|None=Header(default=None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(401,"Entre com sua conta para consultar as métricas.")
+    user_id=await _authenticated_user(authorization.split(" ",1)[1].strip())
+    rows=(await _sb_request("GET","divulgacerto_click_events",params={"campaign_id":"eq."+campaign_id,"user_id":"eq."+user_id,"select":"id,created_at"})).json()
+    return {"campaign_id":campaign_id,"clicks":len(rows),"events":rows}
+
+@app.post("/api/webhooks/conversion")
+async def conversion_webhook(payload: ConversionEvent, x_webhook_token: str|None=Header(default=None)):
+    expected=os.getenv("DIVULGACERTO_WEBHOOK_TOKEN","")
+    if not expected or x_webhook_token!=expected: raise HTTPException(401,"Webhook não autorizado.")
+    if payload.status.lower() not in {"approved","paid","completed","approved_payment"}:
+        return {"received":True,"recorded":False,"reason":"status_not_confirmed"}
+    if payload.amount is not None and payload.amount<0: raise HTTPException(422,"Valor inválido.")
+    await _sb_request("POST","divulgacerto_conversion_events",json_body={"campaign_id":payload.campaign_id,"order_id":payload.order_id,"amount":payload.amount,"currency":payload.currency,"source":payload.source},prefer="resolution=ignore-duplicates,return=minimal")
+    return {"received":True,"recorded":True,"campaign_id":payload.campaign_id}
