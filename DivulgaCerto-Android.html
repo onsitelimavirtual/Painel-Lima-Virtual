@@ -188,24 +188,25 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
 function callToAction(c){const map={vendas:"Peça sua oferta e confira as condições.",leads:"Envie uma mensagem para conversar e tirar suas dúvidas.",visitas:"Acesse o link e conheça todos os detalhes.",divulgacao:"Conheça a proposta e compartilhe com quem possa se interessar."};return map[c.objective]||map.divulgacao;}
 function headline(c,style){const benefit=c.benefit||"uma solução para sua necessidade";const options=[`${c.name}: conheça essa oportunidade`,`${benefit} com ${c.name}`,`Está buscando ${benefit.toLowerCase()}?`];return options[style%options.length];}
 function makeVariant(c,style){
+  const nl=String.fromCharCode(10);
   const analysis=c.productAnalysis||null;
-  const raw=String(c.description||"").trim();
-  const escapedName=String(c.name||"").replace(/[.*+?^${}()|[\]\\]/g,"\\function makeVariant(c,style){const analysis=c.productAnalysis||null;const factual=(analysis?.confirmed||[]).slice(0,4).map(x=>x.claim).join(' ');const safeDescription=factual?`${c.description}\n\nInformações encontradas nas fontes: ${factual}`:c.description;const intro=[`Você já conhece ${c.name}?`,`Uma novidade para quem procura ${c.benefit||c.name}.`,`Conheça uma alternativa: ${c.name}.`][style];const detail=[safeDescription,`${safeDescription} ${c.benefit?"Destaque: "+c.benefit+".":""}`,`${c.name}: ${safeDescription}`][style];const proof="";const audience=c.audience?`\nPara: ${c.audience}.`:"";const price=c.price?`\nValor: ${c.price}.`:"";const link=c.destination?`\nSaiba mais: ${c.destination}`:"";return `${headline(c,style)}\n\n${intro}\n\n${detail}${audience}${price}\n\n${callToAction(c)}${link}${proof}`;}");
-  let description=raw.replace(new RegExp("^\\s*"+escapedName+"\\s*[:—-]?\\s*","i"),"").trim();
+  let description=String(c.description||"").trim();
+  const name=String(c.name||"").trim();
+  if(name&&description.toLocaleLowerCase("pt-BR").startsWith(name.toLocaleLowerCase("pt-BR"))){description=description.slice(name.length).replace(/^\\s*[:—-]?\\s*/,"").trim();}
   const seen=new Set();
-  description=description.split(/\\n+/).map(x=>x.trim()).filter(x=>{const key=x.toLocaleLowerCase("pt-BR");if(!key||key==="informações encontradas nas fontes:")return false;if(seen.has(key))return false;seen.add(key);return true;}).join("\\n");
+  description=description.split(nl).map(x=>x.trim()).filter(x=>{const key=x.toLocaleLowerCase("pt-BR");if(!key||key.startsWith("informações encontradas nas fontes:")||seen.has(key))return false;seen.add(key);return true;}).join(nl);
   const factual=(analysis?.confirmed||[]).map(x=>String(x.claim||"").trim()).filter(Boolean).filter(x=>!description.toLocaleLowerCase("pt-BR").includes(x.toLocaleLowerCase("pt-BR"))).slice(0,3);
-  const detail=[description,factual.length?"Características verificadas: "+factual.join(" "):""].filter(Boolean).join("\\n\\n");
+  const detail=[description,factual.length?"Características verificadas: "+factual.join(" "):""].filter(Boolean).join(nl+nl);
   const intros=["Conheça os detalhes desta proposta.","Veja se esta opção atende ao que você procura.","Confira as informações e avalie a proposta."];
-  const audience=c.audience&&!description.toLocaleLowerCase("pt-BR").includes(c.audience.toLocaleLowerCase("pt-BR"))?"\\nPúblico: "+c.audience+".":"";
-  const price=c.price&&!description.toLocaleLowerCase("pt-BR").includes(c.price.toLocaleLowerCase("pt-BR"))?"\\nValor: "+c.price+".":"";
-  const link=c.destination?"\\nSaiba mais: "+c.destination:"";
-  return headline(c,style)+"\\n\\n"+intros[style%intros.length]+"\\n\\n"+detail+audience+price+"\\n\\n"+callToAction(c)+link;
+  const audience=c.audience&&!description.toLocaleLowerCase("pt-BR").includes(c.audience.toLocaleLowerCase("pt-BR"))?nl+"Público: "+c.audience+".":"";
+  const price=c.price&&!description.toLocaleLowerCase("pt-BR").includes(c.price.toLocaleLowerCase("pt-BR"))?nl+"Valor: "+c.price+".":"";
+  const link=c.destination?nl+"Saiba mais: "+c.destination:"";
+  return headline(c,style)+nl+nl+intros[style%intros.length]+nl+nl+detail+audience+price+nl+nl+callToAction(c)+link;
 }
 function buildContent(c,channel,style=0){
-  const base=makeVariant(c,style);
-  if(channel==="whatsapp")return "Olá!\\n\\n"+base+"\\n\\nSe quiser, posso enviar mais informações.";
-  if(channel==="instagram"){const tags=(c.tags||["empreendedorismo","negocios","pequenosnegocios"]).map(t=>"#"+t.replace(/[^\\p{L}\\p{N}_]/gu,"")).join(" ");return base+"\\n\\n"+tags;}
+  const nl=String.fromCharCode(10),base=makeVariant(c,style);
+  if(channel==="whatsapp")return "Olá!"+nl+nl+base+nl+nl+"Se quiser, posso enviar mais informações.";
+  if(channel==="instagram"){const tags=(c.tags||["empreendedorismo","negocios","pequenosnegocios"]).map(t=>"#"+t.replace(/[^\\p{L}\\p{N}_]/gu,"")).join(" ");return base+nl+nl+tags;}
   return base;
 }
 function selectedChannels(){return [...document.querySelectorAll('input[name="channel"]:checked')].map(x=>x.value);}
