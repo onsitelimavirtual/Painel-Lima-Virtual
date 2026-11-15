@@ -179,7 +179,8 @@ let campaigns = loadCampaigns();
 let activeCampaignId = null;
 let supabaseClient = null;
 let currentSession = null;
-let cloudBusy = false;\nlet activeTrackingUrl = null;
+let cloudBusy = false;
+let activeTrackingUrl = null;
 
 function loadCampaigns() { try { const current=localStorage.getItem(STORE_KEY); const legacy=current===null?localStorage.getItem("divulgahub_mvp_v1"):current; const value=JSON.parse(legacy||"[]"); return Array.isArray(value)?value:[]; } catch { return []; } }
 function localSave(){ localStorage.setItem(STORE_KEY,JSON.stringify(campaigns)); }
