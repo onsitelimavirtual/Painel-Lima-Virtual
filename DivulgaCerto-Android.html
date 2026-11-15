@@ -147,13 +147,7 @@
     </main>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script>/* Configuração do DivulgaCerto. Nunca coloque service_role key no navegador. */
-window.APP_CONFIG = {
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: "",
-  PRODUCT_API_URL: "" // URL HTTPS da API FastAPI de análise de sites e ZIPs
-};
-</script>
+  <script src="./config.js"></script>
   <script>
 const $ = (id) => document.getElementById(id);
 const STORE_KEY = "divulgacerto_mvp_v1";
