@@ -5,7 +5,8 @@ from __future__ import annotations
 import io, ipaddress, json, re, socket, zipfile, os, uuid
 from html import unescape
 from urllib.parse import urlparse
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +14,8 @@ import httpx
 from bs4 import BeautifulSoup
 
 app = FastAPI(title="DivulgaCerto Product Intelligence API", version="2.2.0")
+# Exibe o botão Authorize do Swagger e documenta corretamente o Bearer token do Supabase.
+bearer_scheme = HTTPBearer(auto_error=False, scheme_name="SupabaseBearer")
 app.add_middleware(CORSMiddleware, allow_origins=["https://onsitelimavirtual.github.io"], allow_methods=["POST", "GET"], allow_headers=["*"])
 MAX_ZIP = 50 * 1024 * 1024
 MAX_SITE = 2 * 1024 * 1024
@@ -207,10 +210,10 @@ async def _authenticated_user(access_token: str) -> str:
     return str(r.json().get("id") or "")
 
 @app.post("/api/tracking/register")
-async def register_tracking_link(payload: TrackingRegistration, authorization: str|None=Header(default=None)):
-    if not authorization or not authorization.lower().startswith("bearer "):
+async def register_tracking_link(payload: TrackingRegistration, credentials: HTTPAuthorizationCredentials|None=Depends(bearer_scheme)):
+    if not credentials or credentials.scheme.lower() != "bearer" or not credentials.credentials:
         raise HTTPException(401,"Entre com sua conta para criar um link rastreável.")
-    user_id=await _authenticated_user(authorization.split(" ",1)[1].strip())
+    user_id=await _authenticated_user(credentials.credentials)
     destination=public_url(payload.destination)
     token=uuid.uuid4().hex
     await _sb_request("POST","divulgacerto_tracking_links",json_body={"token":token,"campaign_id":payload.campaign_id,"user_id":user_id,"destination":destination},prefer="resolution=merge-duplicates,return=minimal")
@@ -227,10 +230,10 @@ async def track_click(token: str):
     return RedirectResponse(row["destination"],status_code=302)
 
 @app.get("/api/tracking/stats/{campaign_id}")
-async def tracking_stats(campaign_id: str, authorization: str|None=Header(default=None)):
-    if not authorization or not authorization.lower().startswith("bearer "):
+async def tracking_stats(campaign_id: str, credentials: HTTPAuthorizationCredentials|None=Depends(bearer_scheme)):
+    if not credentials or credentials.scheme.lower() != "bearer" or not credentials.credentials:
         raise HTTPException(401,"Entre com sua conta para consultar as métricas.")
-    user_id=await _authenticated_user(authorization.split(" ",1)[1].strip())
+    user_id=await _authenticated_user(credentials.credentials)
     owned=(await _sb_request("GET","divulgacerto_tracking_links",params={"campaign_id":"eq."+campaign_id,"user_id":"eq."+user_id,"select":"token","limit":"1"})).json()
     if not owned: raise HTTPException(404,"Campanha sem link rastreável ou não pertence a esta conta.")
     rows=(await _sb_request("GET","divulgacerto_click_events",params={"campaign_id":"eq."+campaign_id,"user_id":"eq."+user_id,"select":"id,created_at"})).json()
