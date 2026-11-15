@@ -44,6 +44,16 @@ O HTML carrega `config.js` externamente; não duplique a configuração dentro d
 4. No aplicativo, entre com Google, abra uma campanha e clique em **Gerar link rastreável**. Divulgue esse link em vez do destino original. Cada visita ao link conta um clique antes do redirecionamento.
 5. A contagem automática aparece quando o usuário autenticado abre a campanha novamente. Os cliques só são rastreados em links criados pelo botão; links antigos não são retroativamente rastreados.
 
+### Testar autenticação pela documentação Swagger
+
+1. Abra `/docs` na URL pública do Render.
+2. Entre no DivulgaCerto com Google e obtenha uma sessão ativa no aplicativo.
+3. Para chamadas feitas pelo Swagger, use o access token JWT da sessão Supabase no botão **Authorize** (esquema HTTP Bearer). Não use a chave publishable/anon como token de usuário.
+4. Execute `POST /api/tracking/register` com `campaign_id` e `destination`. A API valida o JWT em `/auth/v1/user` e associa o link ao ID do usuário autenticado.
+5. Consulte as métricas com o mesmo usuário autenticado. O Swagger agora documenta o esquema Bearer no botão Authorize; os endpoints não aceitam chamadas anônimas.
+
+Não compartilhe access tokens, service_role ou webhook token em capturas de tela ou mensagens.
+
 ### Webhook de conversões
 A API aceita POST em `/api/webhooks/conversion`, com cabeçalho `X-Webhook-Token` igual ao segredo cadastrado no Render e JSON:
 ```json
