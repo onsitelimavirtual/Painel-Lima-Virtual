@@ -99,6 +99,11 @@
             <label><input type="checkbox" name="channel" value="whatsapp" checked> WhatsApp</label>
             <label><input type="checkbox" name="channel" value="instagram" checked> Instagram</label>
             <label><input type="checkbox" name="channel" value="facebook" checked> Facebook</label>
+            <label><input type="checkbox" name="channel" value="tiktok"> TikTok</label>
+            <label><input type="checkbox" name="channel" value="youtube"> YouTube</label>
+            <label><input type="checkbox" name="channel" value="telegram"> Telegram</label>
+            <label><input type="checkbox" name="channel" value="email"> E-mail</label>
+            <label><input type="checkbox" name="channel" value="website"> Sites e blogs</label>
           </fieldset>
           <div id="form-error" class="error-message" role="alert" aria-live="polite"></div>
           <div class="form-actions"><button type="button" class="btn btn-outline" data-go="campaigns">Cancelar</button><button type="submit" class="btn btn-primary">Gerar conteúdos</button></div>
@@ -204,9 +209,15 @@ function makeVariant(c,style){
   return headline(c,style)+nl+nl+intros[style%intros.length]+nl+nl+detail+audience+price+nl+nl+callToAction(c)+link;
 }
 function buildContent(c,channel,style=0){
-  const nl=String.fromCharCode(10),base=makeVariant(c,style);
+  const nl=String.fromCharCode(10),base=makeVariant(c,style),link=c.destination?"Saiba mais: "+c.destination:"";
+  const tags=(c.tags||["empreendedorismo","negocios","pequenosnegocios"]).map(t=>"#"+t.replace(/[^\\p{L}\\p{N}_]/gu,"")).join(" ");
   if(channel==="whatsapp")return "Olá!"+nl+nl+base+nl+nl+"Se quiser, posso enviar mais informações.";
-  if(channel==="instagram"){const tags=(c.tags||["empreendedorismo","negocios","pequenosnegocios"]).map(t=>"#"+t.replace(/[^\\p{L}\\p{N}_]/gu,"")).join(" ");return base+nl+nl+tags;}
+  if(channel==="instagram")return base+nl+nl+tags;
+  if(channel==="tiktok")return base+nl+nl+"Veja os detalhes no link da bio. "+tags;
+  if(channel==="youtube")return base+nl+nl+"📌 "+link+nl+nl+"Inscreva-se no canal e acompanhe as próximas novidades.";
+  if(channel==="telegram")return "📢 "+headline(c,style)+nl+nl+base+nl+nl+link;
+  if(channel==="email")return "Assunto: "+headline(c,style)+nl+nl+"Olá!"+nl+nl+base+nl+nl+link+nl+nl+"Atenciosamente,";
+  if(channel==="website")return headline(c,style)+nl+nl+base+nl+nl+link+nl+nl+"Conheça a proposta e entre em contato para saber mais.";
   return base;
 }
 function selectedChannels(){return [...document.querySelectorAll('input[name="channel"]:checked')].map(x=>x.value);}
@@ -215,7 +226,7 @@ $("campaign-form").addEventListener("submit",e=>{e.preventDefault();$("form-erro
 function openEditor(id){const c=campaigns.find(x=>x.id===id);if(!c)return;activeCampaignId=id;$("editor-title").textContent=c.name;$("content-cards").innerHTML=c.channels.map(ch=>`<article class="content-card"><h2>${channelIcon(ch)} ${channelName(ch)}</h2><textarea id="content-${ch}" aria-label="Conteúdo para ${channelName(ch)}">${escapeHtml(c.contents[ch]||buildContent(c,ch,c.variant||0))}</textarea><div class="content-actions"><button class="small-btn" data-copy="${ch}">Copiar texto</button><button class="small-btn" data-share="${ch}">Compartilhar</button></div></article>`).join("");$("manual-clicks").value=c.clicks||0;$("manual-conversions").value=c.conversions||0;$("content-cards").querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>copyContent(b.dataset.copy)));$("content-cards").querySelectorAll("[data-share]").forEach(b=>b.addEventListener("click",()=>shareContent(b.dataset.share)));c.channels.forEach(ch=>$(`content-${ch}`).addEventListener("input",()=>{const current=campaigns.find(x=>x.id===activeCampaignId);if(current){current.contents[ch]=$(`content-${ch}`).value;current.updatedAt=new Date().toISOString();localSave();if(currentSession)syncCampaigns();}}));renderVariants(c);showView("editor");}
 function renderVariants(c){$("strategy-summary").textContent=`Objetivo: ${({vendas:"gerar vendas",leads:"receber contatos",visitas:"atrair visitas",divulgacao:"divulgar a oferta"})[c.objective]||"divulgação"}. As versões abaixo usam os dados informados e não inventam depoimentos, garantias ou resultados.`;const labels=["Direta", "Foco no benefício", "Pergunta de interesse"];$("variants").innerHTML=labels.map((label,i)=>`<article class="variant"><h3>${label}</h3><p>${escapeHtml(makeVariant(c,i).slice(0,115))}…</p><button class="small-btn" data-variant="${i}">Usar esta abordagem</button></article>`).join("");$("variants").querySelectorAll("[data-variant]").forEach(b=>b.addEventListener("click",()=>{const style=Number(b.dataset.variant);c.variant=style;c.channels.forEach(ch=>{c.contents[ch]=buildContent(c,ch,style);});c.updatedAt=new Date().toISOString();localSave();openEditor(c.id);toast("Abordagem aplicada aos canais.");}));}
 $("regenerate-btn").addEventListener("click",()=>{const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;c.variant=((c.variant||0)+1)%3;c.channels.forEach(ch=>c.contents[ch]=buildContent(c,ch,c.variant));c.updatedAt=new Date().toISOString();persist();openEditor(c.id);toast("Novas versões preparadas.");});
-function channelIcon(ch){return{whatsapp:"🟢",instagram:"📸",facebook:"🔵"}[ch]||"•";}function channelName(ch){return{whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook"}[ch]||ch;}function currentContent(ch){return $("content-"+ch)?.value||"";}
+function channelIcon(ch){return{whatsapp:"🟢",instagram:"📸",facebook:"🔵",tiktok:"🎵",youtube:"▶️",telegram:"✈️",email:"✉️",website:"🌐"}[ch]||"•";}function channelName(ch){return{whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook",tiktok:"TikTok",youtube:"YouTube",telegram:"Telegram",email:"E-mail",website:"Sites e blogs"}[ch]||ch;}function currentContent(ch){return $("content-"+ch)?.value||"";}
 async function copyContent(ch){const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;c.contents[ch]=currentContent(ch);persist();try{await navigator.clipboard.writeText(c.contents[ch]);toast("Texto copiado.");}catch{$("content-"+ch).select();toast("Selecione e copie o texto manualmente.");}}
 function shareUrl(ch,text){
   const encoded=encodeURIComponent(text);
@@ -223,6 +234,7 @@ function shareUrl(ch,text){
   const destination=c?.destination||location.href;
   if(ch==="whatsapp")return "https://wa.me/?text="+encoded;
   if(ch==="facebook")return "https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(destination)+"&quote="+encoded;
+  if(ch==="telegram")return "https://t.me/share/url?url="+encodeURIComponent(destination)+"&text="+encoded;
   return "https://www.instagram.com/";
 }
 async function copyForSocial(text){
@@ -233,24 +245,30 @@ async function shareContent(ch){
   const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;
   const text=currentContent(ch).trim();if(!text){toast("Não há texto para compartilhar.");return;}
   c.contents[ch]=text;
-  if(ch==="whatsapp"){
-    const opened=window.open(shareUrl(ch,text),"_blank","noopener,noreferrer");
-    if(!opened){toast("Permita a abertura de janelas para continuar no WhatsApp.");return;}
-    c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();toast("Texto preparado no WhatsApp. Revise e toque em enviar.");return;
+  const targets={whatsapp:shareUrl(ch,text),facebook:shareUrl(ch,text),telegram:shareUrl(ch,text),instagram:"https://www.instagram.com/",tiktok:"https://www.tiktok.com/upload",youtube:"https://www.youtube.com/upload"};
+  if(ch==="email"){
+    const subject=encodeURIComponent(headline(c,c.variant||0));
+    const body=encodeURIComponent(text);
+    window.location.href="mailto:?subject="+subject+"&body="+body;
+    toast("E-mail preparado no aplicativo de correio. Confira os destinatários antes de enviar.");
+  }else if(ch==="website"){
+    try{await copyForSocial(text);toast("Texto de artigo copiado. Cole no editor do seu site ou blog.");}
+    catch(e){toast("Copie o texto do cartão e cole no editor do seu site ou blog.");}
+  }else{
+    const opened=window.open(targets[ch]||"https://www.instagram.com/","_blank","noopener,noreferrer");
+    try{
+      if(ch!=="whatsapp"&&ch!=="facebook"&&ch!=="telegram")await copyForSocial(text);
+      if(ch==="whatsapp"||ch==="facebook"||ch==="telegram"){
+        c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();
+        toast("Compartilhamento preparado. Revise o conteúdo na plataforma antes de publicar.");
+      }else{
+        c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();
+        toast("Texto copiado. Cole na publicação e revise antes de publicar.");
+      }
+    }catch(e){toast("Plataforma aberta. Se necessário, copie o texto diretamente do cartão.");}
+    if(!opened)toast("A plataforma não abriu automaticamente. O conteúdo continua disponível para cópia.");
   }
-  if(ch==="instagram"){
-    const opened=window.open("https://www.instagram.com/","_blank","noopener,noreferrer");
-    try{await copyForSocial(text);c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();toast("Legenda copiada. No Instagram, crie a publicação e cole o texto.");}
-    catch(e){toast("Instagram aberto. Não foi possível copiar automaticamente; copie o texto no cartão.");}
-    if(!opened)toast("Permita a abertura do Instagram. A legenda permanece disponível para cópia.");
-    return;
-  }
-  if(ch==="facebook"){
-    const opened=window.open(shareUrl(ch,text),"_blank","noopener,noreferrer");
-    try{await copyForSocial(text);c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();toast("Texto copiado. No Facebook, cole-o na publicação e confira o link.");}
-    catch(e){toast("Facebook aberto. Copie o texto no cartão e cole na publicação.");}
-    if(!opened)toast("Permita a abertura do Facebook. O texto continua disponível para cópia.");
-  }
+  c.updatedAt=new Date().toISOString();persist();
 }
 function renderCampaignList(targetId,list){const el=$(targetId);if(!list.length){el.classList.add("empty-state");el.textContent="Nenhuma campanha cadastrada.";return;}el.classList.remove("empty-state");el.innerHTML=list.map(c=>`<article class="campaign-row"><div><h3>${escapeHtml(c.name)}</h3><p>${new Date(c.createdAt).toLocaleDateString("pt-BR")} · ${c.channels.map(channelName).join(", ")}</p></div><div class="row-actions"><button class="small-btn" data-open="${c.id}">Conteúdos</button><button class="small-btn" data-edit="${c.id}">Editar</button><button class="small-btn" data-delete="${c.id}">Excluir</button></div></article>`).join("");el.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>openEditor(b.dataset.open)));el.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editCampaign(b.dataset.edit)));el.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>deleteCampaign(b.dataset.delete)));}
 function editCampaign(id){const c=campaigns.find(x=>x.id===id);if(!c)return;$("campaign-id").value=c.id;$("product-name").value=c.name;$("description").value=c.description;$("benefit").value=c.benefit||"";$("price").value=c.price||"";$("destination").value=c.destination||"";$("audience").value=c.audience||"";$("objective").value=c.objective||"divulgacao";document.querySelectorAll('input[name="channel"]').forEach(x=>x.checked=c.channels.includes(x.value));$("form-title").textContent="Editar campanha";showView("create");}
