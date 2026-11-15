@@ -253,7 +253,7 @@ window.applyProductAnalysis = function(profile){
   }
   function svgEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));}
   function wrapText(value,maxChars,maxLines){
-    const words=String(value||'').trim().split(/\\s+/).filter(Boolean);const lines=[];let line='';
+    const words=String(value||'').trim().split(/\s+/).filter(Boolean);const lines=[];let line='';
     for(const word of words){const next=line?line+' '+word:word;if(next.length>maxChars&&line){lines.push(line);line=word;}else line=next;}
     if(line)lines.push(line);if(lines.length>maxLines){lines.length=maxLines;lines[maxLines-1]=lines[maxLines-1].replace(/[.,;:]?$/,'')+'…';}return lines;
   }
@@ -261,18 +261,18 @@ window.applyProductAnalysis = function(profile){
     return '<text x="'+x+'" y="'+y+'" fill="'+fill+'" font-family="Arial,sans-serif" font-size="'+size+'" font-weight="'+(weight||400)+'">'+lines.map((line,i)=>'<tspan x="'+x+'" dy="'+(i?lineHeight:0)+'">'+svgEscape(line)+'</tspan>').join('')+'</text>';
   }
   function promoSvg(p,format,customTitle,customCta){
-    const story=format==='story',w=1080,h=story?1920:1080,title=String(customTitle||p.product_name||'Seu produto').trim(),desc=String(p.summary||'Conheça esta solução').trim(),site=p.sources?.site||'',cta=String(customCta||'SAIBA MAIS').trim().slice(0,28)||'SAIBA MAIS';
+    const story=format==='story',w=1080,h=story?1920:1080,title=String(customTitle||p.product_name||'Seu produto').trim(),desc=String(p.summary||'Conheça esta solução').trim(),site=p.sources?.site||'',ctaLabel=String(customCta||'SAIBA MAIS').trim().slice(0,28)||'SAIBA MAIS';
     const titleLines=wrapText(title,story?21:24,story?4:3),descLines=wrapText(desc,story?37:48,story?5:4);
-    const titleY=story?570:390, titleSize=story?72:68, titleGap=story?88:82, descY=titleY+titleLines.length*titleGap+55, descGap=story?54:46;
-    const ctaY=story?1390:760,ctaW=story?610:450,ctaX=(w-ctaW)/2,siteY=story?1600:955,footerY=story?1770:1015;
+    const titleY=story?530:340,titleSize=story?72:68,titleGap=story?88:76,descY=titleY+titleLines.length*titleGap+40,descGap=story?52:42;
+    const ctaY=Math.max(story?1320:760,descY+descLines.length*descGap+65),ctaW=story?610:450,ctaX=(w-ctaW)/2,siteY=ctaY+180,footerY=siteY+105;
     const safeSite=svgEscape(site.slice(0,68));
-    const ctaShape='<rect x="'+ctaX+'" y="'+ctaY+'" width="'+ctaW+'" height="104" rx="22" fill="url(#gold)"/><text x="540" y="'+(ctaY+66)+'" text-anchor="middle" fill="#14213d" font-family="Arial,sans-serif" font-size="34" font-weight="700">'+svgEscape(cta)+'</text>';
-    const cta=site&&/^https?:\\/\\//i.test(site)?'<a href="'+svgEscape(site)+'" target="_blank" rel="noopener noreferrer">'+ctaShape+'</a>':ctaShape;
+    const ctaShape='<rect x="'+ctaX+'" y="'+ctaY+'" width="'+ctaW+'" height="104" rx="22" fill="url(#dc-gold)"/><text x="540" y="'+(ctaY+66)+'" text-anchor="middle" fill="#14213d" font-family="Arial,sans-serif" font-size="34" font-weight="700">'+svgEscape(ctaLabel)+'</text>';
+    const ctaMarkup=site&&/^https?:\/\//i.test(site)?'<a href="'+svgEscape(site)+'" target="_blank" rel="noopener noreferrer">'+ctaShape+'</a>':ctaShape;
     const titleSvg=svgText(titleLines,84,titleY,titleSize,titleGap,'#ffffff',700),descSvg=svgText(descLines,86,descY,story?34:32,descGap,'#dbe8ff',400);
     return ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Arte promocional de '+svgEscape(title)+'">',
       '<defs><linearGradient id="dc-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101d3a"/><stop offset="1" stop-color="#173d79"/></linearGradient><linearGradient id="dc-gold"><stop stop-color="#fff0a8"/><stop offset="1" stop-color="#d99b27"/></linearGradient></defs>',
       '<rect width="1080" height="'+h+'" rx="48" fill="url(#dc-bg)"/><circle cx="930" cy="'+(story?250:130)+'" r="250" fill="#1f65bd" opacity=".22"/><path d="M80 '+(story?300:160)+'H1000" stroke="url(#dc-gold)" stroke-width="5"/>',
-      '<text x="84" y="'+(story?220:115)+'" fill="#f4d47d" font-family="Arial,sans-serif" font-size="34" letter-spacing="8">DIVULGACERTO</text>',titleSvg,descSvg,cta,
+      '<text x="84" y="'+(story?220:115)+'" fill="#f4d47d" font-family="Arial,sans-serif" font-size="34" letter-spacing="8">DIVULGACERTO</text>',titleSvg,descSvg,ctaMarkup,
       '<text x="84" y="'+siteY+'" fill="#b9c9e5" font-family="Arial,sans-serif" font-size="22">'+safeSite+'</text><text x="84" y="'+footerY+'" fill="#f4d47d" font-family="Arial,sans-serif" font-size="19">Conheça. Explore. Decida.</text>',
       '</svg>'].join('');
   }
