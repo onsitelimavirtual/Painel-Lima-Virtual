@@ -2,5 +2,5 @@
 window.APP_CONFIG = {
   SUPABASE_URL: "",
   SUPABASE_ANON_KEY: "",
-  PRODUCT_API_URL: "" // URL HTTPS da API FastAPI de análise de sites e ZIPs
+  PRODUCT_API_URL: "https://divulgacerto-product-intelligence.onrender.com"
 };
