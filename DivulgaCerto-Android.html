@@ -250,9 +250,10 @@ async function shareContent(ch){
     const subject=encodeURIComponent(headline(c,c.variant||0));
     const body=encodeURIComponent(text);
     window.location.href="mailto:?subject="+subject+"&body="+body;
+    c.shares=(c.shares||0)+1;
     toast("E-mail preparado no aplicativo de correio. Confira os destinatários antes de enviar.");
   }else if(ch==="website"){
-    try{await copyForSocial(text);toast("Texto de artigo copiado. Cole no editor do seu site ou blog.");}
+    try{await copyForSocial(text);c.shares=(c.shares||0)+1;toast("Texto de artigo copiado. Cole no editor do seu site ou blog.");}
     catch(e){toast("Copie o texto do cartão e cole no editor do seu site ou blog.");}
   }else{
     const opened=window.open(targets[ch]||"https://www.instagram.com/","_blank","noopener,noreferrer");
