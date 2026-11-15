@@ -1,0 +1,75 @@
+name: DivulgaCerto 2.2 — QA e pacote ZIP
+on:
+  push:
+    branches: [portfoliolimavirtual]
+    paths:
+      - 'DivulgaCerto-Android.html'
+      - 'config.js'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'termos.html'
+      - 'privacidade.html'
+      - 'styles.css'
+      - 'divulgacerto-icon-512.png'
+      - 'divulgacerto-marca.png'
+      - 'divulgacerto-identidade.png'
+      - 'assets/divulgacerto-logo.webp'
+      - 'analyzer_service.py'
+      - 'requirements-analyzer.txt'
+      - 'render.yaml'
+      - 'supabase_schema.sql'
+      - 'test_analyzer.py'
+      - 'DEPLOY-RENDER-DIVULGACERTO.md'
+      - '.github/workflows/package-divulgacerto-2-1.yml'
+  workflow_dispatch:
+jobs:
+  qa-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install API dependencies
+        run: pip install -r requirements-analyzer.txt
+      - name: Run automated tests
+        run: pytest -q test_analyzer.py
+      - name: Validate frontend and metadata
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          html=pathlib.Path('DivulgaCerto-Android.html').read_text(encoding='utf-8')
+          manifest=json.loads(pathlib.Path('manifest.webmanifest').read_text(encoding='utf-8'))
+          assert '<html lang="pt-BR">' in html
+          assert 'DivulgaCerto 2.2' in html
+          assert manifest['short_name']=='DivulgaCerto 2.2'
+          for name in ['divulgacerto_2_2_metrics.sql','config.js','sw.js','termos.html','privacidade.html','divulgacerto-icon-512.png','divulgacerto-marca.png','divulgacerto-identidade.png']:
+              assert pathlib.Path(name).exists(), f'Arquivo ausente: {name}'
+          import re, subprocess\n          scripts=re.findall(r'<script>(.*?)</script>',html,re.S)\n          pathlib.Path('/tmp/divulgacerto-inline.js').write_text('\\n'.join(scripts),encoding='utf-8')\n          subprocess.run(['node','--check','/tmp/divulgacerto-inline.js'],check=True)\n          print('Frontend, JavaScript e manifesto: OK')
+          PY
+      - name: Assemble package
+        run: |
+          mkdir -p DivulgaCerto_2.2/frontend DivulgaCerto_2.2/api DivulgaCerto_2.2/docs DivulgaCerto_2.2/tests DivulgaCerto_2.2/assets
+          cp DivulgaCerto-Android.html config.js manifest.webmanifest sw.js termos.html privacidade.html styles.css divulgacerto-icon-512.png divulgacerto-marca.png divulgacerto-identidade.png DivulgaCerto_2.2/frontend/
+          cp assets/divulgacerto-logo.webp DivulgaCerto_2.2/assets/
+          cp analyzer_service.py requirements-analyzer.txt render.yaml DivulgaCerto_2.2/api/
+          cp supabase_schema.sql divulgacerto_2_2_metrics.sql DEPLOY-RENDER-DIVULGACERTO.md DivulgaCerto_2.2/docs/
+          cp test_analyzer.py DivulgaCerto_2.2/tests/
+          cat > DivulgaCerto_2.2/LEIA-ME.txt <<'EOF'
+          DivulgaCerto 2.2 — pacote completo
+          Frontend: abra frontend/DivulgaCerto-Android.html em HTTPS ou localhost.
+          API: arquivos FastAPI em api/. Implantação descrita em docs/DEPLOY-RENDER-DIVULGACERTO.md.
+          Banco: execute docs/divulgacerto_2_2_metrics.sql no Supabase para habilitar métricas. Configure variáveis secretas no Render conforme docs/DEPLOY-RENDER-DIVULGACERTO.md.
+          Testes: tests/test_analyzer.py.
+          Métricas: cliques são registrados por link rastreável; conversões automáticas exigem webhook do checkout com campaign_id e token. A contagem de cliques pode incluir bots/pré-visualizações. A análise é heurística, não LLM; publicação em redes é manual.
+          Nunca inclua service_role ou segredos no frontend.
+          EOF
+          cd DivulgaCerto_2.2 && zip -r ../DivulgaCerto_2.2_Completo_Atualizado.zip .
+      - name: Verify ZIP integrity
+        run: unzip -t DivulgaCerto_2.2_Completo_Atualizado.zip
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DivulgaCerto_2.2_Completo_Atualizado
+          path: DivulgaCerto_2.2_Completo_Atualizado.zip
+          retention-days: 14
