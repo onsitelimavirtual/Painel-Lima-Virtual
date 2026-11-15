@@ -1,4 +1,4 @@
-"""API opcional do DivulgaCerto 1.2 para análise de sites e arquivos ZIP.
+"""API opcional do DivulgaCerto 2.1 para análise de sites e arquivos ZIP.
 Não executa código recebido nem extrai arquivos para o sistema de arquivos.
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from bs4 import BeautifulSoup
 
-app = FastAPI(title="DivulgaCerto Product Intelligence API", version="1.2.0")
+app = FastAPI(title="DivulgaCerto Product Intelligence API", version="2.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["https://onsitelimavirtual.github.io"], allow_methods=["POST", "GET"], allow_headers=["*"])
 MAX_ZIP = 50 * 1024 * 1024
 MAX_SITE = 2 * 1024 * 1024
@@ -39,7 +39,7 @@ def public_url(raw: str) -> str:
 
 async def fetch_site(url: str) -> tuple[str,str]:
     url = public_url(url)
-    headers = {'User-Agent':'DivulgaCertoProductAnalyzer/1.2 (+public-site-analysis)', 'Accept':'text/html,text/plain;q=0.9'}
+    headers = {'User-Agent':'DivulgaCertoProductAnalyzer/2.1 (+public-site-analysis)', 'Accept':'text/html,text/plain;q=0.9'}
     try:
         async with httpx.AsyncClient(timeout=12, follow_redirects=False, headers=headers) as client:
             r = await client.get(url)
