@@ -1,11 +1,11 @@
 {
-  "name": "DivulgaCerto 2.1 — Inteligência de Produtos e Divulgação Multicanal",
-  "short_name": "DivulgaCerto 2.1",
+  "name": "DivulgaCerto 2.2 — Inteligência de Produtos e Divulgação Multicanal",
+  "short_name": "DivulgaCerto 2.2",
   "start_url": "./DivulgaCerto-Android.html",
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#14213d",
-  "description": "DivulgaCerto 2.1: inteligência de produtos, campanhas e divulgação multicanal.",
+  "description": "DivulgaCerto 2.2: inteligência de produtos, campanhas e divulgação multicanal.",
   "icons": [
     {
       "src": "./divulgacerto-icon-512.png",
