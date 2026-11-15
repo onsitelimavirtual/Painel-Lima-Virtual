@@ -187,8 +187,27 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
 
 function callToAction(c){const map={vendas:"Peça sua oferta e confira as condições.",leads:"Envie uma mensagem para conversar e tirar suas dúvidas.",visitas:"Acesse o link e conheça todos os detalhes.",divulgacao:"Conheça a proposta e compartilhe com quem possa se interessar."};return map[c.objective]||map.divulgacao;}
 function headline(c,style){const benefit=c.benefit||"uma solução para sua necessidade";const options=[`${c.name}: conheça essa oportunidade`,`${benefit} com ${c.name}`,`Está buscando ${benefit.toLowerCase()}?`];return options[style%options.length];}
-function makeVariant(c,style){const analysis=c.productAnalysis||null;const factual=(analysis?.confirmed||[]).slice(0,4).map(x=>x.claim).join(' ');const safeDescription=factual?`${c.description}\n\nInformações encontradas nas fontes: ${factual}`:c.description;const intro=[`Você já conhece ${c.name}?`,`Uma novidade para quem procura ${c.benefit||c.name}.`,`Conheça uma alternativa: ${c.name}.`][style];const detail=[safeDescription,`${safeDescription} ${c.benefit?"Destaque: "+c.benefit+".":""}`,`${c.name}: ${safeDescription}`][style];const proof="";const audience=c.audience?`\nPara: ${c.audience}.`:"";const price=c.price?`\nValor: ${c.price}.`:"";const link=c.destination?`\nSaiba mais: ${c.destination}`:"";return `${headline(c,style)}\n\n${intro}\n\n${detail}${audience}${price}\n\n${callToAction(c)}${link}${proof}`;}
-function buildContent(c,channel,style=0){const base=makeVariant(c,style);if(channel==="whatsapp")return `Olá! ${base}\n\nSe quiser, posso enviar mais informações.`;if(channel==="instagram"){const tags=(c.tags||["empreendedorismo","negocios","pequenosnegocios"]).map(t=>"#"+t.replace(/[^\p{L}\p{N}_]/gu,"")).join(" ");return `${base}\n\n${tags}`;}return `${base}\n\nCompartilhe esta publicação com alguém que possa se interessar.`;}
+function makeVariant(c,style){
+  const analysis=c.productAnalysis||null;
+  const raw=String(c.description||"").trim();
+  const escapedName=String(c.name||"").replace(/[.*+?^${}()|[\]\\]/g,"\\function makeVariant(c,style){const analysis=c.productAnalysis||null;const factual=(analysis?.confirmed||[]).slice(0,4).map(x=>x.claim).join(' ');const safeDescription=factual?`${c.description}\n\nInformações encontradas nas fontes: ${factual}`:c.description;const intro=[`Você já conhece ${c.name}?`,`Uma novidade para quem procura ${c.benefit||c.name}.`,`Conheça uma alternativa: ${c.name}.`][style];const detail=[safeDescription,`${safeDescription} ${c.benefit?"Destaque: "+c.benefit+".":""}`,`${c.name}: ${safeDescription}`][style];const proof="";const audience=c.audience?`\nPara: ${c.audience}.`:"";const price=c.price?`\nValor: ${c.price}.`:"";const link=c.destination?`\nSaiba mais: ${c.destination}`:"";return `${headline(c,style)}\n\n${intro}\n\n${detail}${audience}${price}\n\n${callToAction(c)}${link}${proof}`;}");
+  let description=raw.replace(new RegExp("^\\s*"+escapedName+"\\s*[:—-]?\\s*","i"),"").trim();
+  const seen=new Set();
+  description=description.split(/\\n+/).map(x=>x.trim()).filter(x=>{const key=x.toLocaleLowerCase("pt-BR");if(!key||key==="informações encontradas nas fontes:")return false;if(seen.has(key))return false;seen.add(key);return true;}).join("\\n");
+  const factual=(analysis?.confirmed||[]).map(x=>String(x.claim||"").trim()).filter(Boolean).filter(x=>!description.toLocaleLowerCase("pt-BR").includes(x.toLocaleLowerCase("pt-BR"))).slice(0,3);
+  const detail=[description,factual.length?"Características verificadas: "+factual.join(" "):""].filter(Boolean).join("\\n\\n");
+  const intros=["Conheça os detalhes desta proposta.","Veja se esta opção atende ao que você procura.","Confira as informações e avalie a proposta."];
+  const audience=c.audience&&!description.toLocaleLowerCase("pt-BR").includes(c.audience.toLocaleLowerCase("pt-BR"))?"\\nPúblico: "+c.audience+".":"";
+  const price=c.price&&!description.toLocaleLowerCase("pt-BR").includes(c.price.toLocaleLowerCase("pt-BR"))?"\\nValor: "+c.price+".":"";
+  const link=c.destination?"\\nSaiba mais: "+c.destination:"";
+  return headline(c,style)+"\\n\\n"+intros[style%intros.length]+"\\n\\n"+detail+audience+price+"\\n\\n"+callToAction(c)+link;
+}
+function buildContent(c,channel,style=0){
+  const base=makeVariant(c,style);
+  if(channel==="whatsapp")return "Olá!\\n\\n"+base+"\\n\\nSe quiser, posso enviar mais informações.";
+  if(channel==="instagram"){const tags=(c.tags||["empreendedorismo","negocios","pequenosnegocios"]).map(t=>"#"+t.replace(/[^\\p{L}\\p{N}_]/gu,"")).join(" ");return base+"\\n\\n"+tags;}
+  return base;
+}
 function selectedChannels(){return [...document.querySelectorAll('input[name="channel"]:checked')].map(x=>x.value);}
 function validUrl(value){if(!value)return true;try{const u=new URL(value);return ["http:","https:"].includes(u.protocol);}catch{return false;}}
 $("campaign-form").addEventListener("submit",e=>{e.preventDefault();$("form-error").textContent="";const name=$("product-name").value.trim(),description=$("description").value.trim(),destination=$("destination").value.trim(),channels=selectedChannels();if(!name||!description){$("form-error").textContent="Preencha o nome e a descrição da oferta.";return;}if(!validUrl(destination)){$("form-error").textContent="O link precisa ser um endereço válido iniciado por http:// ou https://.";return;}if(!channels.length){$("form-error").textContent="Selecione pelo menos um canal de divulgação.";return;}const id=$("campaign-id").value||(crypto.randomUUID?crypto.randomUUID():String(Date.now()));const existing=campaigns.find(x=>x.id===id);const item={id,name,description,benefit:$("benefit").value.trim(),price:$("price").value.trim(),destination,audience:$("audience").value.trim(),objective:$("objective").value,channels,contents:{...(existing?.contents||{})},createdAt:existing?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),shares:existing?.shares||0,clicks:existing?.clicks||0,conversions:existing?.conversions||0,variant:existing?.variant||0,productAnalysis:existing?.productAnalysis||window.DC_PRODUCT_ANALYSIS||null};channels.forEach(ch=>item.contents[ch]=buildContent(item,ch,item.variant));if(existing)campaigns=campaigns.map(x=>x.id===id?item:x);else campaigns.unshift(item);persist();$("campaign-form").reset();$("campaign-id").value="";$("form-title").textContent="Criar campanha";openEditor(id);toast("Campanha salva e conteúdos preparados.");});
@@ -197,8 +216,41 @@ function renderVariants(c){$("strategy-summary").textContent=`Objetivo: ${({vend
 $("regenerate-btn").addEventListener("click",()=>{const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;c.variant=((c.variant||0)+1)%3;c.channels.forEach(ch=>c.contents[ch]=buildContent(c,ch,c.variant));c.updatedAt=new Date().toISOString();persist();openEditor(c.id);toast("Novas versões preparadas.");});
 function channelIcon(ch){return{whatsapp:"🟢",instagram:"📸",facebook:"🔵"}[ch]||"•";}function channelName(ch){return{whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook"}[ch]||ch;}function currentContent(ch){return $("content-"+ch)?.value||"";}
 async function copyContent(ch){const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;c.contents[ch]=currentContent(ch);persist();try{await navigator.clipboard.writeText(c.contents[ch]);toast("Texto copiado.");}catch{$("content-"+ch).select();toast("Selecione e copie o texto manualmente.");}}
-function shareUrl(ch,text){const encoded=encodeURIComponent(text);if(ch==="whatsapp")return`https://wa.me/?text=${encoded}`;if(ch==="facebook")return`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaigns.find(x=>x.id===activeCampaignId)?.destination||location.href)}&quote=${encoded}`;return"https://www.instagram.com/";}
-async function shareContent(ch){const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;c.contents[ch]=currentContent(ch);c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();const text=c.contents[ch];if(navigator.share&&ch==="whatsapp"){try{await navigator.share({title:c.name,text,url:c.destination||undefined});toast("Compartilhamento acionado.");}catch(err){if(err.name!=="AbortError")window.open(shareUrl(ch,text),"_blank","noopener");}}else{window.open(shareUrl(ch,text),"_blank","noopener");if(ch==="instagram"){try{await navigator.clipboard.writeText(text);toast("Texto copiado. Cole-o no Instagram.");}catch{toast("Instagram aberto. Copie o texto manualmente.");}}else toast("Opção de compartilhamento aberta.");}}
+function shareUrl(ch,text){
+  const encoded=encodeURIComponent(text);
+  const c=campaigns.find(x=>x.id===activeCampaignId);
+  const destination=c?.destination||location.href;
+  if(ch==="whatsapp")return "https://wa.me/?text="+encoded;
+  if(ch==="facebook")return "https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(destination)+"&quote="+encoded;
+  return "https://www.instagram.com/";
+}
+async function copyForSocial(text){
+  if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);return true;}
+  const helper=document.createElement("textarea");helper.value=text;helper.setAttribute("readonly","");helper.style.position="fixed";helper.style.opacity="0";document.body.appendChild(helper);helper.select();const ok=document.execCommand("copy");helper.remove();if(!ok)throw new Error("Cópia indisponível");return true;
+}
+async function shareContent(ch){
+  const c=campaigns.find(x=>x.id===activeCampaignId);if(!c)return;
+  const text=currentContent(ch).trim();if(!text){toast("Não há texto para compartilhar.");return;}
+  c.contents[ch]=text;
+  if(ch==="whatsapp"){
+    const opened=window.open(shareUrl(ch,text),"_blank","noopener,noreferrer");
+    if(!opened){toast("Permita a abertura de janelas para continuar no WhatsApp.");return;}
+    c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();toast("Texto preparado no WhatsApp. Revise e toque em enviar.");return;
+  }
+  if(ch==="instagram"){
+    const opened=window.open("https://www.instagram.com/","_blank","noopener,noreferrer");
+    try{await copyForSocial(text);c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();toast("Legenda copiada. No Instagram, crie a publicação e cole o texto.");}
+    catch(e){toast("Instagram aberto. Não foi possível copiar automaticamente; copie o texto no cartão.");}
+    if(!opened)toast("Permita a abertura do Instagram. A legenda permanece disponível para cópia.");
+    return;
+  }
+  if(ch==="facebook"){
+    const opened=window.open(shareUrl(ch,text),"_blank","noopener,noreferrer");
+    try{await copyForSocial(text);c.shares=(c.shares||0)+1;c.updatedAt=new Date().toISOString();persist();toast("Texto copiado. No Facebook, cole-o na publicação e confira o link.");}
+    catch(e){toast("Facebook aberto. Copie o texto no cartão e cole na publicação.");}
+    if(!opened)toast("Permita a abertura do Facebook. O texto continua disponível para cópia.");
+  }
+}
 function renderCampaignList(targetId,list){const el=$(targetId);if(!list.length){el.classList.add("empty-state");el.textContent="Nenhuma campanha cadastrada.";return;}el.classList.remove("empty-state");el.innerHTML=list.map(c=>`<article class="campaign-row"><div><h3>${escapeHtml(c.name)}</h3><p>${new Date(c.createdAt).toLocaleDateString("pt-BR")} · ${c.channels.map(channelName).join(", ")}</p></div><div class="row-actions"><button class="small-btn" data-open="${c.id}">Conteúdos</button><button class="small-btn" data-edit="${c.id}">Editar</button><button class="small-btn" data-delete="${c.id}">Excluir</button></div></article>`).join("");el.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>openEditor(b.dataset.open)));el.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editCampaign(b.dataset.edit)));el.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>deleteCampaign(b.dataset.delete)));}
 function editCampaign(id){const c=campaigns.find(x=>x.id===id);if(!c)return;$("campaign-id").value=c.id;$("product-name").value=c.name;$("description").value=c.description;$("benefit").value=c.benefit||"";$("price").value=c.price||"";$("destination").value=c.destination||"";$("audience").value=c.audience||"";$("objective").value=c.objective||"divulgacao";document.querySelectorAll('input[name="channel"]').forEach(x=>x.checked=c.channels.includes(x.value));$("form-title").textContent="Editar campanha";showView("create");}
 function deleteCampaign(id){if(!confirm("Excluir esta campanha e seus registros?"))return;campaigns=campaigns.filter(c=>c.id!==id);persist();toast("Campanha excluída.");}
