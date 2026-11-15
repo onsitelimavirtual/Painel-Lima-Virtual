@@ -1,10 +1,17 @@
 {
-  "name": "Painel Lima Virtual 3.2.1",
-  "short_name": "Lima Virtual",
-  "description": "Painel com ícone INKIS IA embutido e melhor contraste do bloco Passe para o Concurso.",
+  "name": "DivulgaCerto — Inteligência de Produtos e Divulgação Multicanal",
+  "short_name": "DivulgaCerto",
   "start_url": "./",
-  "scope": "./",
   "display": "standalone",
-  "background_color": "#07111f",
-  "theme_color": "#07111f"
+  "background_color": "#f5f7fb",
+  "theme_color": "#14213d",
+  "description": "Central inteligente para criar e acompanhar campanhas multicanal.",
+  "icons": [
+    {
+      "src": "./divulgacerto-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
