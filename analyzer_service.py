@@ -187,14 +187,18 @@ class ConversionEvent(BaseModel):
 
 def _supabase_env():
     url=os.getenv("SUPABASE_URL","").rstrip("/")
-    key=os.getenv("SUPABASE_SERVICE_ROLE_KEY","")
+    # Preferir a nova Secret key (sb_secret_); manter fallback legado durante a migração.
+    key=os.getenv("SUPABASE_SECRET_KEY","") or os.getenv("SUPABASE_SERVICE_ROLE_KEY","")
     if not url or not key:
-        raise HTTPException(503,"Rastreamento indisponível: configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no serviço.")
+        raise HTTPException(503,"Rastreamento indisponível: configure SUPABASE_URL e SUPABASE_SECRET_KEY no serviço.")
     return url,key
 
 async def _sb_request(method: str, path: str, *, params=None, json_body=None, prefer=None, token=None):
     url,key=_supabase_env()
-    headers={"apikey":key,"Authorization":f"Bearer {token or key}","Content-Type":"application/json"}
+    # A Secret key sb_secret_* é uma API key opaca: deve ir somente em apikey.
+    # Authorization é reservado ao JWT do usuário quando houver escopo por usuário.
+    headers={"apikey":key,"Content-Type":"application/json"}
+    if token: headers["Authorization"]="Bearer "+token
     if prefer: headers["Prefer"]=prefer
     async with httpx.AsyncClient(timeout=12) as client:
         response=await client.request(method,url+"/rest/v1/"+path,params=params,json=json_body,headers=headers)
