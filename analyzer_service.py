@@ -11,7 +11,10 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
+import logging
 from bs4 import BeautifulSoup
+
+logger = logging.getLogger("divulgacerto.supabase")
 
 app = FastAPI(title="DivulgaCerto Product Intelligence API", version="2.2.0")
 # Exibe o botão Authorize do Swagger e documenta corretamente o Bearer token do Supabase.
@@ -203,7 +206,16 @@ async def _sb_request(method: str, path: str, *, params=None, json_body=None, pr
     async with httpx.AsyncClient(timeout=12) as client:
         response=await client.request(method,url+"/rest/v1/"+path,params=params,json=json_body,headers=headers)
     if response.status_code>=400:
-        raise HTTPException(502,"Falha ao consultar o banco de métricas. Verifique a migração SQL e as variáveis do Supabase.")
+        # Registrar diagnóstico técnico sem expor cabeçalhos, chaves ou tokens.
+        try:
+            detail = response.text[:1200]
+        except Exception:
+            detail = "<corpo de resposta indisponível>"
+        logger.error(
+            "Supabase REST falhou: method=%s path=%s status=%s response=%s",
+            method, path.split("?")[0], response.status_code, detail
+        )
+        raise HTTPException(502,"Falha ao consultar o banco de métricas. Consulte os Application Logs do Render para o diagnóstico técnico.")
     return response
 
 async def _authenticated_user(access_token: str) -> str:
