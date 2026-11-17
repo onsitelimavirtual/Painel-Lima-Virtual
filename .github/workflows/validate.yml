@@ -1,0 +1,30 @@
+name: Validacao estatica - Painel Lima Virtual 4.1
+
+on:
+  push:
+    branches: [stabilizacao-4.1]
+  pull_request:
+    branches: [portfoliolimavirtual]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validar JavaScript inline dos HTML
+        run: python scripts/validate_inline_js.py
+      - name: Validar sintaxe do Service Worker
+        run: node --check service-worker.js
